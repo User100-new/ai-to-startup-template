@@ -61,9 +61,9 @@ Copy one, fill in the blanks, and send it:
 
 > Our startup idea is: **[one sentence]**. Our customers are **[who]**, and the problem we solve is **[problem]**. Update `data.js` and the text in `index.html` so the site describes our startup. Don't change the layout yet.
 
-> Replace the sample listings in `data.js` with 8 realistic but fake examples that fit our startup.
+> Tailor the workout plans, meal ideas, and food alternatives in `data.js` to our customers. Keep the guidance welcoming, flexible, and general.
 
-> Add a page that shows how our product gets more valuable as more people use it. Use fake numbers so we can compare 10 users with 10,000 users.
+> Improve the wellness dashboard for our customers. Keep everything mobile-friendly, accessible, and easy to explore.
 
 ### How to talk to Copilot
 
@@ -133,10 +133,10 @@ That link is your live site. Every commit updates it automatically within a few 
 
 | File | What it is |
 |---|---|
-| `index.html` | The structure and text of your site |
-| `styles.css` | How it looks: colours, fonts, spacing |
-| `data.js` | All your fake data (listings, prices, users…) |
-| `app.js` | What the site *does* when people click things |
+| `index.html` | The dashboard, workout, nutrition, and progress pages |
+| `styles.css` | How the site looks: colours, fonts, spacing and mobile layout |
+| `data.js` | Sample fitness goals, workout plans, meal ideas, and food alternatives |
+| `app.js` | Navigation, filters, daily check-ins, and progress tracking |
 | `project-notes/PROJECT_LOG.md` | Your team's record of prompts, problems and decisions |
 | `project-notes/BUSINESS_CASE.md` | The business reasoning behind your prototype |
 | `.github/copilot-instructions.md` | The rules Copilot follows in this project — don't delete it |
