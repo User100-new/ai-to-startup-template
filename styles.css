@@ -204,6 +204,7 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .choice-row { display: flex; flex-wrap: wrap; gap: 8px; }
 .choice-row label { display: flex; align-items: center; gap: 6px; padding: 7px 9px; border: 1px solid #314158; border-radius: 5px; color: #b5c3d5; background: #151f2d; font-size: 10px; }
 .choice-row input { accent-color: #91b9f4; }
+.equipment-hint { margin: 8px 0 0; color: #91a0b2; font-size: 9px; }
 .choice-row-error { border: 1px solid #c68c8c; border-radius: 7px; }
 .fitness-form>.button { justify-self: start; margin-top: 2px; }
 .weekly-plan-section { margin-bottom: 34px; }
@@ -221,6 +222,7 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .exercise-row>strong { font-size: 11px; }
 .exercise-groups { color: #96abd0; font-size: 9px; }
 .exercise-prescription { margin: 3px 0 0; color: #d8e4f4; font-size: 9px; font-weight: 650; }
+.exercise-equipment { color: #d5c48f; font-size: 9px; }
 .exercise-instructions { margin: 2px 0 7px; color: #91a0b2; font-size: 9px; line-height: 1.55; }
 .exercise-substitute { justify-self: start; padding: 4px 7px; }
 .plan-empty { color: #96a6ba; }

@@ -140,7 +140,7 @@ That link is your live site. Every commit updates it automatically within a few 
 | `index.html` | The dashboard, workout, nutrition, and progress pages |
 | `styles.css` | How the site looks: colours, fonts, spacing and mobile layout |
 | `data.js` | Sample fitness goals, workout plans, meal ideas, and food alternatives |
-| `app.js` | Navigation, filters, daily check-ins, and progress tracking |
+| `app.js` | Equipment-aware workout generation, navigation, nutrition planning, and demo progress tracking |
 | `assets/` | Local anatomy background plus real food and exercise photos |
 | `project-notes/PROJECT_LOG.md` | Your team's record of prompts, problems and decisions |
 | `project-notes/BUSINESS_CASE.md` | The business reasoning behind your prototype |

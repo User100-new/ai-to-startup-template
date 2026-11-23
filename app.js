@@ -3,10 +3,19 @@
   "use strict";
 
   const STORE_KEY = "ascend-catalyst";
+  const EQUIPMENT_OPTIONS = ["None", "Dumbbells", "Barbell", "Squat rack", "Kettlebell", "Resistance bands", "Bench", "Cable machine", "Weight machines", "Pull-up bar"];
   const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionMeals: null, premium: false };
   let state = emptyState;
   let storageAvailable = true;
   const notice = document.getElementById("storage-notice");
+
+  function normalizeEquipment(items) {
+    const selected = Array.isArray(items)
+      ? Array.from(new Set(items.filter(function (item) { return EQUIPMENT_OPTIONS.includes(item); })))
+      : [];
+    const withEquipment = selected.filter(function (item) { return item !== "None"; });
+    return withEquipment.length ? withEquipment : ["None"];
+  }
 
   function readState() {
     try {
@@ -23,7 +32,7 @@
           time: ["Morning", "Afternoon", "Evening", "Flexible"].includes(preferences.time) ? preferences.time : "Flexible",
           diet: ["Flexible", "Vegetarian", "Vegan", "Plant-forward"].includes(preferences.diet) ? preferences.diet : "Flexible",
           days: Array.isArray(preferences.days) ? preferences.days.filter(function (day) { return ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].includes(day); }) : [],
-          equipment: Array.isArray(preferences.equipment) ? preferences.equipment.filter(function (item) { return ["None","Dumbbells","Resistance bands","Bench"].includes(item); }) : ["None"]
+          equipment: normalizeEquipment(preferences.equipment)
         } : null,
         schedule: null,
         nutritionPhase: ["maintain", "cut", "bulk"].includes(preferences.nutritionPhase) ? preferences.nutritionPhase : "maintain",
@@ -80,44 +89,134 @@
   saveState();
 
   const EXERCISES = [
-    { name: "Chair squats", groups: "Quads · Glutes", reps: "3 × 8–12", rest: "60–90 sec", instructions: "Sit back toward a sturdy chair, keep your feet planted, then stand tall.", equipment: ["None"] },
-    { name: "Wall push-ups", groups: "Chest · Triceps", reps: "3 × 8–12", rest: "60 sec", instructions: "Place hands on a wall, keep a straight body line, and move your chest toward the wall.", equipment: ["None"] },
-    { name: "Glute bridges", groups: "Glutes · Hamstrings", reps: "3 × 10–15", rest: "60 sec", instructions: "Lie down, press through your feet, and lift your hips without arching your back.", equipment: ["None"] },
-    { name: "Supported rows", groups: "Back · Biceps", reps: "3 × 10–12", rest: "60–90 sec", instructions: "Use a resistance band or dumbbells. Pull elbows behind you and lower slowly.", equipment: ["Resistance bands", "Dumbbells"] },
-    { name: "Dumbbell floor press", groups: "Chest · Triceps", reps: "3 × 8–12", rest: "60–90 sec", instructions: "Lie safely on the floor and press dumbbells upward, keeping wrists stacked.", equipment: ["Dumbbells"] },
-    { name: "Reverse lunges", groups: "Quads · Glutes", reps: "2 × 8 each side", rest: "60 sec", instructions: "Step one foot backward, lower with control, and return to standing.", equipment: ["None"] },
-    { name: "Dead bug", groups: "Core", reps: "3 × 8 each side", rest: "45 sec", instructions: "Keep your lower back gently pressed down while extending opposite arm and leg.", equipment: ["None"] },
-    { name: "Bird dog", groups: "Core · Back", reps: "3 × 8 each side", rest: "45 sec", instructions: "From hands and knees, reach opposite arm and leg out, then return with control.", equipment: ["None"] },
-    { name: "Low-impact marching", groups: "Cardio · Hip flexors", reps: "3 × 2 min", rest: "30 sec", instructions: "March at a comfortable pace, adding arm movement if it feels good.", equipment: ["None"] },
-    { name: "Band biceps curls", groups: "Biceps", reps: "3 × 10–15", rest: "60 sec", instructions: "Stand on the band and curl while keeping elbows close to your sides.", equipment: ["Resistance bands"] },
-    { name: "Banded shoulder press", groups: "Shoulders · Triceps", reps: "3 × 8–12", rest: "60 sec", instructions: "Stand on the band, palms forward, and press hands overhead without leaning back.", equipment: ["Resistance bands"] }
+    { name: "Chair squats", pattern: "squat", groups: "Quads · Glutes", equipment: [], rest: "60–90 sec", instructions: "Sit back toward a sturdy chair, keep your feet planted, then stand tall." },
+    { name: "Reverse lunges", pattern: "squat", groups: "Quads · Glutes", equipment: [], repType: "eachSide", rest: "60–90 sec", instructions: "Step one foot back, lower with control, and return to standing." },
+    { name: "Dumbbell goblet squat", pattern: "squat", groups: "Quads · Glutes · Core", equipment: ["Dumbbells"], rest: "60–90 sec", instructions: "Hold one dumbbell close to your chest, sit between your hips, then stand tall." },
+    { name: "Dumbbell split squat", pattern: "squat", groups: "Quads · Glutes", equipment: ["Dumbbells"], repType: "eachSide", rest: "60–90 sec", instructions: "Hold light dumbbells at your sides and lower into a comfortable split stance." },
+    { name: "Barbell back squat", pattern: "squat", groups: "Quads · Glutes · Core", equipment: ["Barbell", "Squat rack"], minExperience: "intermediate", rest: "90–120 sec", instructions: "Use a rack and safeties; squat only through a controlled, comfortable range." },
+    { name: "Kettlebell goblet squat", pattern: "squat", groups: "Quads · Glutes · Core", equipment: ["Kettlebell"], rest: "60–90 sec", instructions: "Hold a kettlebell at your chest, sit between your hips, then stand tall." },
+    { name: "Leg press", pattern: "squat", groups: "Quads · Glutes", equipment: ["Weight machines"], rest: "60–90 sec", instructions: "Use a comfortable machine range and keep your knees tracking with your toes." },
+    { name: "Bench step-ups", pattern: "squat", groups: "Quads · Glutes", equipment: ["Bench"], repType: "eachSide", rest: "60–90 sec", instructions: "Use a stable low bench, step up under control, then step down carefully." },
+    { name: "Band squats", pattern: "squat", groups: "Quads · Glutes", equipment: ["Resistance bands"], rest: "60–90 sec", instructions: "Stand on a resistance band and hold its ends as you squat with control." },
+
+    { name: "Glute bridges", pattern: "hinge", groups: "Glutes · Hamstrings", equipment: [], rest: "45–60 sec", instructions: "Press through your feet and lift your hips without arching your back." },
+    { name: "Dumbbell Romanian deadlift", pattern: "hinge", groups: "Hamstrings · Glutes · Back", equipment: ["Dumbbells"], rest: "60–90 sec", instructions: "Push your hips back with a soft knee bend, then stand by driving your hips forward." },
+    { name: "Barbell Romanian deadlift", pattern: "hinge", groups: "Hamstrings · Glutes · Back", equipment: ["Barbell"], minExperience: "intermediate", rest: "90–120 sec", instructions: "Keep the bar close and hinge at your hips with a steady, neutral back." },
+    { name: "Kettlebell deadlift", pattern: "hinge", groups: "Hamstrings · Glutes · Back", equipment: ["Kettlebell"], rest: "60–90 sec", instructions: "Hinge to pick up the kettlebell, stand tall, and lower it with control." },
+    { name: "Cable pull-through", pattern: "hinge", groups: "Glutes · Hamstrings", equipment: ["Cable machine"], rest: "60–90 sec", instructions: "Face away from the cable, hinge your hips back, then squeeze your glutes to stand." },
+    { name: "Machine hamstring curl", pattern: "hinge", groups: "Hamstrings", equipment: ["Weight machines"], rest: "45–60 sec", instructions: "Adjust the machine comfortably and curl your heels toward you without swinging." },
+
+    { name: "Wall push-ups", pattern: "push", groups: "Chest · Triceps · Shoulders", equipment: [], rest: "45–60 sec", instructions: "Place hands on a wall and move your chest toward it while keeping a straight body line." },
+    { name: "Bench incline push-ups", pattern: "push", groups: "Chest · Triceps · Shoulders", equipment: ["Bench"], rest: "45–60 sec", instructions: "Place hands on a stable bench and lower your chest toward it with a straight body line." },
+    { name: "Dumbbell floor press", pattern: "push", groups: "Chest · Triceps", equipment: ["Dumbbells"], rest: "60–90 sec", instructions: "Lie on the floor and press dumbbells upward with wrists stacked over elbows." },
+    { name: "Dumbbell bench press", pattern: "push", groups: "Chest · Triceps", equipment: ["Dumbbells", "Bench"], rest: "60–90 sec", instructions: "Lie securely on a bench and press dumbbells upward without locking your elbows." },
+    { name: "Barbell floor press", pattern: "push", groups: "Chest · Triceps", equipment: ["Barbell"], minExperience: "intermediate", rest: "90–120 sec", instructions: "Use a safe setup and controlled range; stop if positioning feels unstable." },
+    { name: "Barbell bench press", pattern: "push", groups: "Chest · Triceps", equipment: ["Barbell", "Bench"], minExperience: "intermediate", rest: "90–120 sec", instructions: "Use a spotter or safety arms, lower the bar under control, and press smoothly." },
+    { name: "Cable chest press", pattern: "push", groups: "Chest · Triceps · Shoulders", equipment: ["Cable machine"], rest: "60–90 sec", instructions: "Stand balanced between the cables and press forward without shrugging." },
+    { name: "Machine chest press", pattern: "push", groups: "Chest · Triceps", equipment: ["Weight machines"], rest: "60–90 sec", instructions: "Adjust the seat so handles are at chest height and press smoothly." },
+    { name: "Resistance-band chest press", pattern: "push", groups: "Chest · Triceps", equipment: ["Resistance bands"], rest: "60 sec", instructions: "Anchor the band securely behind you and press forward with control." },
+
+    { name: "Prone Y-T raises", pattern: "pull", groups: "Upper back · Shoulders", equipment: [], repType: "eachSide", rest: "45–60 sec", instructions: "Lie face down and lift your arms gently into a Y or T without straining your neck." },
+    { name: "Resistance-band rows", pattern: "pull", groups: "Back · Biceps", equipment: ["Resistance bands"], rest: "60 sec", instructions: "Anchor the band securely, pull your elbows back, and return slowly." },
+    { name: "One-arm dumbbell row", pattern: "pull", groups: "Back · Biceps", equipment: ["Dumbbells"], repType: "eachSide", rest: "60–90 sec", instructions: "Support one hand on a stable surface and row the dumbbell toward your hip." },
+    { name: "Barbell bent-over row", pattern: "pull", groups: "Back · Biceps", equipment: ["Barbell"], minExperience: "intermediate", rest: "90 sec", instructions: "Hinge at your hips, brace your torso, and pull the bar toward your lower ribs." },
+    { name: "Kettlebell one-arm row", pattern: "pull", groups: "Back · Biceps", equipment: ["Kettlebell"], repType: "eachSide", rest: "60–90 sec", instructions: "Brace one hand on a stable support and row the kettlebell toward your hip." },
+    { name: "Seated cable row", pattern: "pull", groups: "Back · Biceps", equipment: ["Cable machine"], rest: "60–90 sec", instructions: "Sit tall, draw the handle toward your waist, and avoid rocking your torso." },
+    { name: "Machine seated row", pattern: "pull", groups: "Back · Biceps", equipment: ["Weight machines"], rest: "60–90 sec", instructions: "Set the seat comfortably and pull the handles toward your torso." },
+    { name: "Lat pulldown", pattern: "pull", groups: "Back · Biceps", equipment: ["Cable machine"], rest: "60–90 sec", instructions: "Pull the bar toward your upper chest and let it rise slowly without leaning far back." },
+    { name: "Machine lat pulldown", pattern: "pull", groups: "Back · Biceps", equipment: ["Weight machines"], rest: "60–90 sec", instructions: "Adjust the pad and pull the bar toward your upper chest with control." },
+    { name: "Assisted or bodyweight pull-ups", pattern: "pull", groups: "Back · Biceps", equipment: ["Pull-up bar"], minExperience: "intermediate", rest: "90 sec", instructions: "Use assistance as needed and lower with control; stop before grip or form fails." },
+
+    { name: "Dead bug", pattern: "core", groups: "Core", equipment: [], repType: "eachSide", rest: "45 sec", instructions: "Keep your lower back gently pressed down as you extend opposite arm and leg." },
+    { name: "Bird dog", pattern: "core", groups: "Core · Back", equipment: [], repType: "eachSide", rest: "45 sec", instructions: "From hands and knees, reach opposite arm and leg out, then return with control." },
+    { name: "Forearm plank", pattern: "core", groups: "Core · Shoulders", equipment: [], repType: "time", rest: "45–60 sec", instructions: "Brace gently, keep a straight line, and stop if your back sags or discomfort develops." },
+    { name: "Band Pallof press", pattern: "core", groups: "Core", equipment: ["Resistance bands"], repType: "eachSide", rest: "45–60 sec", instructions: "Anchor a band at chest height and press forward while resisting rotation." },
+    { name: "Cable Pallof press", pattern: "core", groups: "Core", equipment: ["Cable machine"], repType: "eachSide", rest: "45–60 sec", instructions: "Stand sideways to the cable and press forward without letting your torso rotate." },
+    { name: "Hanging knee raises", pattern: "core", groups: "Core · Hip flexors", equipment: ["Pull-up bar"], minExperience: "intermediate", repType: "reps", rest: "60 sec", instructions: "Hang securely and raise your knees only through a comfortable, controlled range." },
+
+    { name: "Standing calf raises", pattern: "legAccessory", groups: "Calves", equipment: [], repType: "reps", rest: "45 sec", instructions: "Rise onto your toes, pause briefly, then lower your heels slowly." },
+    { name: "Resistance-band lateral walks", pattern: "legAccessory", groups: "Glutes · Hips", equipment: ["Resistance bands"], repType: "eachSide", rest: "45–60 sec", instructions: "Place a light band above your knees and take small controlled side steps." },
+    { name: "Machine leg extension", pattern: "legAccessory", groups: "Quads", equipment: ["Weight machines"], rest: "45–60 sec", instructions: "Adjust the pad comfortably and extend your knees without swinging." },
+    { name: "Dumbbell step-ups", pattern: "legAccessory", groups: "Quads · Glutes", equipment: ["Dumbbells", "Bench"], repType: "eachSide", rest: "60–90 sec", instructions: "Use a stable low bench and step up and down slowly while holding manageable weights." },
+
+    { name: "Prone reverse snow angels", pattern: "upperAccessory", groups: "Upper back · Shoulders", equipment: [], repType: "reps", rest: "45 sec", instructions: "Lie face down and sweep your arms slowly from overhead toward your hips." },
+    { name: "Dumbbell biceps curls", pattern: "upperAccessory", groups: "Biceps", equipment: ["Dumbbells"], rest: "45–60 sec", instructions: "Keep elbows near your sides and curl the dumbbells without swinging." },
+    { name: "Band biceps curls", pattern: "upperAccessory", groups: "Biceps", equipment: ["Resistance bands"], rest: "45–60 sec", instructions: "Stand on the band and curl while keeping your elbows near your sides." },
+    { name: "Dumbbell overhead press", pattern: "upperAccessory", groups: "Shoulders · Triceps", equipment: ["Dumbbells"], rest: "60–90 sec", instructions: "Press light dumbbells overhead without arching your back." },
+    { name: "Machine shoulder press", pattern: "upperAccessory", groups: "Shoulders · Triceps", equipment: ["Weight machines"], rest: "60–90 sec", instructions: "Adjust the seat and press overhead through a comfortable range." },
+    { name: "Cable triceps pressdown", pattern: "upperAccessory", groups: "Triceps", equipment: ["Cable machine"], rest: "45–60 sec", instructions: "Keep elbows close to your sides and press the handle down smoothly." },
+    { name: "Band face pulls", pattern: "upperAccessory", groups: "Upper back · Shoulders", equipment: ["Resistance bands"], rest: "45–60 sec", instructions: "Anchor the band near face height and pull toward your forehead with elbows wide." }
   ];
 
   function selectedValues(name) {
     return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(function (input) { return input.value; });
   }
 
+  function initializeEquipmentChoices() {
+    const inputs = Array.from(document.querySelectorAll('input[name="equipment"]'));
+    const none = inputs.find(function (input) { return input.value === "None"; });
+    inputs.forEach(function (input) {
+      input.addEventListener("change", function () {
+        if (input.value === "None" && input.checked) {
+          inputs.forEach(function (item) { if (item !== none) item.checked = false; });
+        } else if (input.checked && none) {
+          none.checked = false;
+        }
+        if (!inputs.some(function (item) { return item.checked; }) && none) none.checked = true;
+      });
+    });
+  }
+  initializeEquipmentChoices();
+
+  function exerciseUsesAvailableEquipment(exercise, equipment) {
+    return exercise.equipment.every(function (item) { return equipment.includes(item); });
+  }
+
+  function prescribeExercise(exercise, profile) {
+    const sets = profile.experience === "beginner" ? 2 : profile.experience === "advanced" ? 4 : 3;
+    const range = profile.goal === "strength" ? "6–10" : profile.goal === "endurance" ? "10–15" : "8–12";
+    const reps = exercise.repType === "time"
+      ? "20–40 sec"
+      : range + (exercise.repType === "eachSide" ? " each side" : " reps");
+    return {
+      ...exercise,
+      reps: sets + " × " + reps,
+      equipment: exercise.equipment.slice()
+    };
+  }
+
   function buildSchedule(profile) {
     const selectedDays = profile.days.length ? profile.days : ["Monday", "Wednesday", "Friday"];
-    const dayLimit = selectedDays.length;
-    const templates = profile.goal === "fat-loss"
-      ? [["Low-impact marching", "Chair squats", "Wall push-ups", "Dead bug"], ["Supported rows", "Glute bridges", "Reverse lunges", "Bird dog"], ["Low-impact marching", "Chair squats", "Banded shoulder press", "Dead bug"]]
-      : profile.goal === "endurance"
-      ? [["Low-impact marching", "Chair squats", "Bird dog", "Glute bridges"], ["Low-impact marching", "Wall push-ups", "Dead bug", "Reverse lunges"], ["Low-impact marching", "Supported rows", "Chair squats", "Glute bridges"]]
-      : [["Chair squats", "Wall push-ups", "Glute bridges", "Dead bug"], ["Supported rows", "Reverse lunges", "Band biceps curls", "Bird dog"], ["Dumbbell floor press", "Glute bridges", "Chair squats", "Dead bug"]];
-
-    return selectedDays.slice(0, dayLimit).map(function (day, index) {
-      const template = templates[index % templates.length];
+    const equipment = normalizeEquipment(profile.equipment);
+    const levelRank = { beginner: 0, intermediate: 1, advanced: 2 };
+    const availableLevel = levelRank[profile.experience] || 0;
+    const patternCounts = {};
+    return selectedDays.map(function (day, index) {
+      const fullBody = selectedDays.length <= 3;
+      const patterns = fullBody
+        ? ["squat", "hinge", "push", "pull", "core"]
+        : index % 2 === 0
+          ? ["squat", "hinge", "legAccessory", "core"]
+          : ["push", "pull", "upperAccessory", "core"];
+      const exercises = patterns.map(function (pattern) {
+        const candidates = EXERCISES.filter(function (exercise) {
+          return exercise.pattern === pattern &&
+            exerciseUsesAvailableEquipment(exercise, equipment) &&
+            (!exercise.minExperience || availableLevel >= levelRank[exercise.minExperience]);
+        });
+        const equippedCandidates = candidates.filter(function (exercise) { return exercise.equipment.length > 0; });
+        const choices = equippedCandidates.length ? equippedCandidates : candidates;
+        if (!choices.length) return null;
+        const choiceIndex = patternCounts[pattern] || 0;
+        patternCounts[pattern] = choiceIndex + 1;
+        return prescribeExercise(choices[choiceIndex % choices.length], profile);
+      }).filter(Boolean);
       return {
         id: day.toLowerCase(),
         day: day,
-        muscleGroups: index % 3 === 0 ? "Full body · Core" : index % 3 === 1 ? "Back · Legs · Core" : "Chest · Legs · Core",
+        muscleGroups: fullBody ? "Full body · Core" : index % 2 === 0 ? "Lower body · Core" : "Upper body · Core",
         completed: false,
-        exercises: template.map(function (name) {
-          const exercise = EXERCISES.find(function (item) { return item.name === name; });
-          const available = !exercise || exercise.equipment.every(function (item) { return item === "None" || profile.equipment.includes(item); });
-          return available ? { ...exercise } : { ...EXERCISES.find(function (item) { return item.name === "Chair squats"; }) };
-        })
+        exercises: exercises
       };
     });
   }
@@ -132,14 +231,6 @@
     document.getElementById("profile-diet").value = profile.diet || "Flexible";
     document.querySelectorAll('input[name="days"]').forEach(function (input) { input.checked = profile.days.includes(input.value); });
     document.querySelectorAll('input[name="equipment"]').forEach(function (input) { input.checked = profile.equipment.includes(input.value); });
-  }
-
-  function exerciseOptions(dayId, exerciseIndex) {
-    const scheduleDay = state.schedule.find(function (day) { return day.id === dayId; });
-    const choices = EXERCISES.map(function (exercise) {
-      return '<option value="' + exercise.name + '"' + (scheduleDay.exercises[exerciseIndex].name === exercise.name ? " selected" : "") + ">" + exercise.name + "</option>";
-    }).join("");
-    return choices;
   }
 
   function renderSchedule() {
@@ -172,24 +263,33 @@
         const row = node("div", "exercise-row");
         row.append(node("strong", "", exercise.name), node("span", "exercise-groups", exercise.groups));
         const prescription = node("p", "exercise-prescription", exercise.reps + " · Rest " + exercise.rest);
+        const exerciseEquipment = Array.isArray(exercise.equipment) ? exercise.equipment : [];
+        const equipmentLabel = exercise.isCardio
+          ? "Equipment: varies by activity"
+          : "Equipment: " + (exerciseEquipment.length ? exerciseEquipment.join(" + ") : "Bodyweight / none");
+        const equipment = node("span", "exercise-equipment", equipmentLabel);
         const instructions = node("p", "exercise-instructions", exercise.instructions);
+        const availableEquipment = state.profile ? normalizeEquipment(state.profile.equipment) : ["None"];
+        const levelRank = { beginner: 0, intermediate: 1, advanced: 2 };
+        const availableLevel = levelRank[state.profile && state.profile.experience] || 0;
+        const replacements = EXERCISES.filter(function (item) {
+          return item.name !== exercise.name &&
+            item.pattern === exercise.pattern &&
+            exerciseUsesAvailableEquipment(item, availableEquipment) &&
+            (!item.minExperience || availableLevel >= levelRank[item.minExperience]);
+        });
         const substitute = node("button", "exercise-substitute", "Substitute");
         substitute.type = "button";
+        substitute.disabled = replacements.length === 0;
         substitute.addEventListener("click", function () {
-          const replacements = EXERCISES.filter(function (item) {
-            const availableEquipment = state.profile ? state.profile.equipment : ["None"];
-            return item.name !== exercise.name &&
-              item.equipment.every(function (equipment) { return equipment === "None" || availableEquipment.includes(equipment); }) &&
-              item.groups.split(" · ").some(function (group) { return exercise.groups.includes(group); });
-          });
-          const replacement = replacements[0] || EXERCISES.find(function (item) { return item.name === "Chair squats"; });
+          const replacement = replacements[0];
           if (replacement) {
-            day.exercises[exerciseIndex] = { ...replacement };
+            day.exercises[exerciseIndex] = prescribeExercise(replacement, state.profile);
             saveState();
             renderSchedule();
           }
         });
-        row.append(prescription, instructions);
+        row.append(prescription, equipment, instructions);
         if (!exercise.isCardio) row.append(substitute);
         card.append(row);
       });
@@ -810,7 +910,7 @@
       time: document.getElementById("profile-time").value,
       diet: document.getElementById("profile-diet").value,
       days: days,
-      equipment: selectedValues("equipment")
+      equipment: normalizeEquipment(selectedValues("equipment"))
     };
     state.profile = profile;
     state.schedule = buildSchedule(profile);
