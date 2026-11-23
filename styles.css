@@ -18,7 +18,7 @@
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; color: var(--text); background-color: var(--background); background-image: linear-gradient(180deg,rgb(11 16 25 / 68%),rgb(11 16 25 / 84%) 48%,rgb(11 16 25 / 92%)),url("assets/anatomy-systems.svg"); background-repeat: no-repeat,no-repeat; background-position: center,center 105px; background-size: cover,min(1080px,100vw) auto; background-attachment: fixed,fixed; font: 15px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
+body { margin: 0; color: var(--text); background-color: var(--background); background-image: linear-gradient(180deg,rgb(11 16 25 / 68%),rgb(11 16 25 / 84%) 48%,rgb(11 16 25 / 92%)); background-repeat: no-repeat; background-position: center; background-size: cover; background-attachment: fixed; font: 15px/1.6 var(--font); -webkit-font-smoothing: antialiased; }
 a { color: inherit; }
 button, select, textarea { font: inherit; }
 button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
