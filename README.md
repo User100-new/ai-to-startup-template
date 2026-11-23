@@ -125,6 +125,10 @@ That link is your live site. Every commit updates it automatically within a few 
 - No real personal information about anyone — all data is fake.
 - No passwords, API keys or secrets in any file.
 - No real payments, logins or forms that send data anywhere.
+- The website must run on GitHub Pages with plain HTML, CSS and JavaScript only; do not add external libraries, frameworks, CDNs, APIs or build tools.
+- Never ask visitors to enter real health or personal information. Browser storage is limited to fictional demo preferences; workout completion and progress stay in the current page session.
+- Clearly label nutrition numbers as estimates, include a general health disclaimer, and remind visitors to check food labels because meal suggestions are not allergen-safe guarantees.
+- Keep the footer text: "Student prototype created for a university project. Not a real commercial service."
 - No real company logos, brand names or copyrighted characters.
 - Keep the footer saying this is a student prototype.
 - No installs, no outside code libraries, no build tools.
@@ -137,8 +141,20 @@ That link is your live site. Every commit updates it automatically within a few 
 | `styles.css` | How the site looks: colours, fonts, spacing and mobile layout |
 | `data.js` | Sample fitness goals, workout plans, meal ideas, and food alternatives |
 | `app.js` | Navigation, filters, daily check-ins, and progress tracking |
+| `assets/` | Local anatomy background plus real food and exercise photos |
 | `project-notes/PROJECT_LOG.md` | Your team's record of prompts, problems and decisions |
 | `project-notes/BUSINESS_CASE.md` | The business reasoning behind your prototype |
 | `.github/copilot-instructions.md` | The rules Copilot follows in this project — don't delete it |
 
 What exactly to hand in and how it's graded is in the term project brief on Moodle.
+
+The anatomy graphic and food/exercise photos are stored locally in `assets/`; the site does not load images from a remote service.
+
+Photo credits and licenses:
+
+- The detailed muscle anatomy layer is adapted from OpenStax via Wikimedia Commons, licensed CC BY 4.0; it has been recolored blue and its white background made transparent: https://commons.wikimedia.org/wiki/File:1105_Anterior_View_of_Muscles_High-Res.png.
+- The squat photo is by PTPioneer via Flickr, licensed CC BY 2.0: https://www.flickr.com/photos/182613284@N02/48441593886/.
+- The peanut-butter-and-banana toast photo is by Daderot via Wikimedia Commons, CC0: https://commons.wikimedia.org/wiki/File:Peanut_butter_and_banana_on_toasted_homemade_bread_-_Massachusetts.jpg.
+- The lentil photo is by HaJunkiyada via Wikimedia Commons, licensed CC BY-SA 4.0: https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Cooked_Lentils_with_Caramelized_Onions.jpg.
+- The black-bean photo is by Ranjithkumar Murugesan via Wikimedia Commons, CC0: https://commons.wikimedia.org/wiki/File:BLACK_TURTLE_BEANS.jpg.
+- Other bundled food and exercise photos are from Unsplash and Pexels, under their respective free-use licenses: https://unsplash.com/license and https://www.pexels.com/license/.

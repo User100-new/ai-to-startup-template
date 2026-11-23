@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 820" fill="none">
+  <defs>
+    <linearGradient id="bone" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#e0f2ff"/>
+      <stop offset="1" stop-color="#8ec4ea"/>
+    </linearGradient>
+    <linearGradient id="nerve" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#b9e3ff"/>
+      <stop offset="1" stop-color="#6ea9dc"/>
+    </linearGradient>
+  </defs>
+  <g opacity=".32" stroke-linecap="round" stroke-linejoin="round">
+    <image href="anatomy-muscular-blue.png" x="12" y="74" width="360" height="609" preserveAspectRatio="xMidYMid meet"/>
+    <g transform="translate(382 38)">
+      <g transform="translate(0 58)" stroke="url(#bone)" stroke-width="7">
+        <path d="M145 20c-18 0-28 14-28 31 0 11 5 19 13 24v11h30V75c8-5 13-13 13-24 0-17-10-31-28-31z" fill="#b9dfff"/>
+        <circle cx="134" cy="48" r="2" fill="#bfe2fa" stroke="none"/><circle cx="156" cy="48" r="2" fill="#bfe2fa" stroke="none"/>
+        <path d="M145 87v220m0-194-50 2m50-2 50 2m-100 0-26 82m126-82 26 82m-176 22 36 11m214-11-36 11m-176-11 38 6m176-6-38 6" fill="none"/>
+        <path d="M115 108c-18 0-27 12-27 29 0 12 9 17 27 17h30m0-46h30c18 0 27 12 27 29 0 12-9 17-27 17h-30M115 130h30m30 0h-30M115 151h30m30 0h-30M115 172h30m30 0h-30M115 193h30m30 0h-30M115 214h30m30 0h-30M115 235h30m30 0h-30M115 256h30m30 0h-30" fill="none" stroke-width="4"/>
+        <path d="M120 293l-27 51m97-51 27 51m-124-41 16 94m92-94-16 94m-92 0-9 96m117-96 9 96" fill="none" stroke-width="13"/>
+        <path d="M120 293c-16 8-18 27-7 40l32 17 32-17c11-13 9-32-7-40z" fill="#b9dfff"/>
+        <path d="M71 211l22 10m126-10-22 10" fill="none" stroke-width="5"/>
+        <circle cx="67" cy="225" r="8" fill="#b9dfff"/><circle cx="223" cy="225" r="8" fill="#b9dfff"/>
+      </g>
+    </g>
+    <g transform="translate(716 38)">
+      <g transform="translate(0 58)" stroke="url(#nerve)" stroke-width="4">
+        <path d="M145 87c-31 0-54 14-63 48l-26 120 22 6 36-97 8 105-18 115 30 4 11-95 11 95 30-4-18-115 8-105 36 97 22-6-26-120c-9-34-32-48-63-48z" fill="#82b3d8" stroke="#83b9e2" stroke-width="2"/>
+        <path d="M145 26c-18 0-29 12-29 29 0 14 8 24 19 29v13h20V84c11-5 19-15 19-29 0-17-11-29-29-29z" fill="#c0e4ff" stroke-width="3"/>
+        <path d="M145 98v264m0-214-38 27-28 55m66-82 38 27 28 55m-66-36-30 30-24 61m54-91 30 30 24 61m-54-43-24 38-15 76m39-114 24 38 15 76m-39-65-29 52-6 69m35-121 29 52 6 69" fill="none"/>
+        <path d="M126 45c7-9 14-8 19 0 5-8 12-9 19 0m-38 11c6 7 12 7 19 0 7 7 13 7 19 0" fill="none" stroke-width="3"/>
+        <circle cx="107" cy="125" r="5" fill="#c8e8ff" stroke="none"/><circle cx="183" cy="125" r="5" fill="#c8e8ff" stroke="none"/>
+        <circle cx="79" cy="180" r="5" fill="#c8e8ff" stroke="none"/><circle cx="211" cy="180" r="5" fill="#c8e8ff" stroke="none"/>
+        <circle cx="83" cy="247" r="5" fill="#c8e8ff" stroke="none"/><circle cx="207" cy="247" r="5" fill="#c8e8ff" stroke="none"/>
+        <circle cx="121" cy="310" r="5" fill="#c8e8ff" stroke="none"/><circle cx="169" cy="310" r="5" fill="#c8e8ff" stroke="none"/>
+      </g>
+    </g>
+  </g>
+</svg>

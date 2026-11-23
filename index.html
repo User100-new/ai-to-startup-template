@@ -11,8 +11,14 @@
 <body>
   <header class="site-header">
     <a class="brand" href="#home" aria-label="Ascend Catalyst home">
-      <span class="brand-mark" aria-hidden="true">A</span>
-      <span>ascend<span class="brand-light">catalyst</span></span>
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" focusable="false">
+          <path class="mitochondrion-shell" d="M5.2 13.1C7.1 6.4 15.6 3.5 23 6.2c6.1 2.2 7.6 8.5 3.5 14.5-4 5.8-14.4 8.1-20.3 4.5-3.4-2.1-2.5-7.1-1-12.1Z"/>
+          <path class="mitochondrion-fold" d="M8 11.4c2.2-2.8 5-2.7 6.2-.5 1.1 2.1-1.6 3.2-1.8 5.1-.2 1.8 2.5 2.2 3.3 4 .8 1.9-.2 3.3-1.9 3.8m2.8-17.2c1.9 1.1 2.3 2.7 1.2 4.1-1.1 1.4-2.8 2.2-2.1 4.1.6 1.6 3 1.9 3.6 3.7.4 1.2-.1 2.4-1.3 3.4m4-13.9c2.1 1.2 2.3 3.2 1.2 4.6-.9 1.2-2.2 2.1-1.7 3.7.3.9 1.2 1.5 2.2 1.9"/>
+          <circle class="mitochondrion-dot" cx="8.2" cy="21.4" r="1"/>
+        </svg>
+      </span>
+      <span>Ascend<span class="brand-light">catalyst</span></span>
     </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a href="#home">Overview</a>
@@ -27,6 +33,136 @@
     <p class="storage-notice page-shell" id="storage-notice" role="status" hidden></p>
 
     <section id="home" class="view page-shell" data-view>
+      <section class="fitness-onboarding" aria-labelledby="fitness-plan-heading">
+        <div class="onboarding-heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> PERSONALIZED FITNESS PLAN</p>
+            <h1 id="fitness-plan-heading">Build a plan <span>for your routine.</span></h1>
+            <p class="welcome-copy">Choose demonstration preferences to generate a sample first-week plan. Please do not enter real health or personal information.</p>
+          </div>
+          <span class="pill pill-light">ABOUT 2 MINUTES</span>
+        </div>
+        <form id="fitness-form" class="fitness-form">
+          <div class="profile-grid">
+            <label>Fitness goal
+              <select id="profile-goal" name="goal" required>
+                <option value="">Choose a goal</option>
+                <option value="strength">Build strength</option>
+                <option value="fat-loss">Improve body composition</option>
+                <option value="endurance">Improve endurance</option>
+                <option value="health">Improve overall health</option>
+              </select>
+            </label>
+            <label>Experience level
+              <select id="profile-experience" name="experience" required>
+                <option value="">Choose your level</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </label>
+            <label>Activity level
+              <select id="profile-activity" name="activity" required>
+                <option value="">Choose activity level</option>
+                <option value="sedentary">Mostly sedentary</option>
+                <option value="light">Lightly active</option>
+                <option value="active">Active</option>
+                <option value="very-active">Very active</option>
+              </select>
+            </label>
+            <label>Preferred training time
+              <select id="profile-time" name="time" required>
+                <option value="Morning">Morning</option>
+                <option value="Afternoon">Afternoon</option>
+                <option value="Evening">Evening</option>
+                <option value="Flexible">Flexible</option>
+              </select>
+            </label>
+            <label>Meal style preference
+              <select id="profile-diet" name="diet">
+                <option value="Flexible">Flexible</option>
+                <option value="Vegetarian">Vegetarian</option>
+                <option value="Vegan">Vegan</option>
+                <option value="Plant-forward">Plant-forward</option>
+              </select>
+            </label>
+          </div>
+          <fieldset class="profile-fieldset">
+            <legend>Available workout days</legend>
+            <div id="profile-days" class="choice-row">
+              <label><input type="checkbox" name="days" value="Monday"> Mon</label>
+              <label><input type="checkbox" name="days" value="Tuesday"> Tue</label>
+              <label><input type="checkbox" name="days" value="Wednesday"> Wed</label>
+              <label><input type="checkbox" name="days" value="Thursday"> Thu</label>
+              <label><input type="checkbox" name="days" value="Friday"> Fri</label>
+              <label><input type="checkbox" name="days" value="Saturday"> Sat</label>
+              <label><input type="checkbox" name="days" value="Sunday"> Sun</label>
+            </div>
+          </fieldset>
+          <fieldset class="profile-fieldset">
+            <legend>Available equipment</legend>
+            <div id="profile-equipment" class="choice-row">
+              <label><input type="checkbox" name="equipment" value="None" checked> No equipment</label>
+              <label><input type="checkbox" name="equipment" value="Dumbbells"> Dumbbells</label>
+              <label><input type="checkbox" name="equipment" value="Resistance bands"> Resistance bands</label>
+              <label><input type="checkbox" name="equipment" value="Bench"> Bench</label>
+            </div>
+          </fieldset>
+          <p class="demo-data-note">Demo only: these general preferences are saved in this browser. Do not enter real personal or health information. Food suggestions are not allergen-safe guarantees.</p>
+          <button class="button button-primary" type="submit">Create my weekly plan <span aria-hidden="true">→</span></button>
+        </form>
+      </section>
+
+      <section class="dashboard" aria-labelledby="dashboard-heading">
+        <div class="dashboard-heading">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-line"></span> TODAY’S OVERVIEW</p>
+            <h1 id="dashboard-heading">Your <span>fitness dashboard.</span></h1>
+          </div>
+          <a class="button button-outline" href="#fitness-plan-heading" id="dashboard-edit">Update preferences</a>
+        </div>
+        <div class="dashboard-grid">
+          <article class="dashboard-card dashboard-week">
+            <div class="dashboard-card-heading"><div><p class="eyebrow">WEEKLY TRAINING</p><h2>Upcoming workouts</h2></div><a href="#workouts" class="text-link">View plan →</a></div>
+            <div id="dashboard-week" class="dashboard-week-list"></div>
+          </article>
+          <article class="dashboard-card dashboard-nutrition">
+            <div class="dashboard-card-heading"><div><p class="eyebrow">DAILY NUTRITION</p><h2>Targets &amp; meals</h2></div><a href="#nutrition" class="text-link">Open planner →</a></div>
+            <div id="dashboard-targets" class="dashboard-targets"></div>
+            <div id="dashboard-meals" class="dashboard-meals"></div>
+          </article>
+          <article class="dashboard-card">
+            <p class="eyebrow">COMPLETED THIS WEEK</p>
+            <strong id="dashboard-completed" class="dashboard-big-number">0</strong>
+            <p id="dashboard-completed-note" class="dashboard-card-note">workouts completed</p>
+            <div id="dashboard-progress-ring" class="progress-ring" aria-label="Weekly completion progress"><span id="dashboard-ring-value">0%</span></div>
+          </article>
+          <article class="dashboard-card">
+            <p class="eyebrow">CARDIO ACTIVITY</p>
+            <strong id="dashboard-cardio" class="dashboard-big-number">0</strong>
+            <p class="dashboard-card-note">activities in your schedule</p>
+            <a class="card-link" href="#workouts">Explore cardio →</a>
+          </article>
+        </div>
+        <div class="dashboard-bottom-grid">
+          <article class="dashboard-card fitness-progress-card">
+            <div class="dashboard-card-heading"><div><p class="eyebrow">FITNESS PROGRESS</p><h2>Weekly consistency</h2></div><span id="dashboard-streak" class="pill">0 day streak</span></div>
+            <div id="dashboard-chart" class="progress-chart" aria-label="Seven day activity chart"></div>
+          </article>
+          <article class="premium-card">
+            <span class="pill pill-light">FICTIONAL ASCEND+</span>
+            <h2>Take your plan further.</h2>
+            <p>Advanced meal planning, custom workouts, deeper tracking, and exportable progress reports.</p>
+            <button type="button" id="premium-toggle" class="button button-white">Preview premium $8/month</button>
+            <ul id="premium-details" hidden>
+              <li>Personalized calorie cycling</li>
+              <li>Unlimited workout customization</li>
+              <li>Long-term progress analytics</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
       <div class="welcome-row">
         <div>
           <p class="eyebrow"><span class="eyebrow-line"></span> YOUR PERSONAL WELLNESS SPACE</p>
@@ -55,15 +191,10 @@
           </div>
         </article>
         <article class="checkin-card">
-          <div class="card-topline"><span class="eyebrow">YOUR DAILY CHECK-IN</span><span class="checkin-icon" aria-hidden="true">◷</span></div>
-          <h2>How are you<br>feeling today?</h2>
-          <p>There’s no wrong answer. Check in with yourself.</p>
-          <div class="mood-options" role="group" aria-label="How are you feeling today?">
-            <button type="button" class="mood-button" data-mood="Low-key" aria-label="Low-key">☁<span>Low-key</span></button>
-            <button type="button" class="mood-button" data-mood="Doing okay" aria-label="Doing okay">◉<span>Okay</span></button>
-            <button type="button" class="mood-button" data-mood="Feeling great" aria-label="Feeling great">✳<span>Great</span></button>
-          </div>
-          <p id="mood-status" class="mood-status" aria-live="polite">A quick check-in, just for you.</p>
+          <div class="card-topline"><span class="eyebrow">YOUR STARTING POINT</span><span class="checkin-icon" aria-hidden="true">✳</span></div>
+          <h2>Make a plan that fits.</h2>
+          <p>Set a goal, choose your days, and explore a flexible sample plan. Adjust anything to suit your needs.</p>
+          <a class="button button-white" href="#workouts">Explore your plan <span aria-hidden="true">→</span></a>
         </article>
       </div>
 
@@ -75,10 +206,8 @@
         <div class="daily-grid">
           <article class="daily-card water-card">
             <div class="daily-card-heading"><span class="tile-icon water-icon" aria-hidden="true">≈</span><span class="pill">HYDRATION</span></div>
-            <h3>A sip at a time</h3>
-            <p>Sip when you’re thirsty; what feels right is personal.</p>
-            <div class="water-track" aria-hidden="true"><div id="water-progress"></div></div>
-            <div class="water-bottom"><span id="water-count">0 of 8 glasses</span><button type="button" class="small-action" id="water-add" aria-label="Add a glass of water">+ Log a glass</button></div>
+            <h3>Keep water nearby</h3>
+            <p>General reminder: drink to thirst and adjust for heat and activity.</p>
           </article>
           <article class="daily-card movement-card">
             <div class="daily-card-heading"><span class="tile-icon movement-icon" aria-hidden="true">↗</span><span class="pill">MOVEMENT</span></div>
@@ -108,6 +237,64 @@
 
     <section id="workouts" class="view page-shell" data-view hidden>
       <div class="page-intro"><p class="eyebrow"><span class="eyebrow-line"></span> FIND YOUR KIND OF MOVEMENT</p><h1>Move at <span>your pace.</span></h1><p class="welcome-copy">No perfect routine, no pressure. Pick what sounds good today—and feel free to make it your own.</p></div>
+      <section class="weekly-plan-section" aria-labelledby="weekly-plan-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">YOUR PERSONALIZED WEEK</p><h2 id="weekly-plan-heading">Weekly workout plan</h2></div>
+          <button type="button" id="edit-plan" class="button button-outline edit-plan">Change answers</button>
+        </div>
+        <p id="plan-summary" class="plan-summary"></p>
+        <div id="weekly-plan" class="weekly-plan"></div>
+      </section>
+      <section class="cardio-planner" aria-labelledby="cardio-planner-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">BUILD YOUR AEROBIC BASE</p><h2 id="cardio-planner-heading">Cardio &amp; physical activity</h2></div>
+          <label class="cardio-day-label">Add to <select id="cardio-day"></select></label>
+        </div>
+        <p class="cardio-intro">Cardio supports heart health and endurance. It also complements strength training by improving recovery capacity and work capacity without replacing resistance work.</p>
+        <div id="cardio-options" class="cardio-options"></div>
+      </section>
+      <section class="muscle-anatomy" aria-labelledby="muscle-anatomy-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">CHOOSE A MUSCLE</p><h2 id="muscle-anatomy-heading">Muscle workout explorer</h2></div>
+          <div class="anatomy-view-switch" role="group" aria-label="Anatomy view">
+            <button type="button" class="anatomy-view active" data-anatomy="front">Front</button>
+            <button type="button" class="anatomy-view" data-anatomy="back">Back</button>
+          </div>
+        </div>
+        <div class="anatomy-layout">
+          <div class="anatomy-figure" id="anatomy-front" aria-label="Front human muscle anatomy">
+            <svg viewBox="0 0 260 430" role="img" aria-label="Front view selectable human muscles">
+              <ellipse cx="130" cy="38" rx="28" ry="34" class="body-skin"/>
+              <path d="M102 72c-20 12-29 27-36 50l-18 78 27 7 21-68 34 35 34-35 21 68 27-7-18-78c-7-23-16-38-36-50z" class="body-skin"/>
+              <g class="muscle-zone" data-muscle="chest" tabindex="0" role="button" aria-label="Chest"><path d="M111 96c-22 1-32 12-34 31l36 16 17-29z"/><path d="M149 96c22 1 32 12 34 31l-36 16-17-29z"/></g>
+              <g class="muscle-zone" data-muscle="shoulders" tabindex="0" role="button" aria-label="Shoulders"><ellipse cx="83" cy="112" rx="19" ry="24"/><ellipse cx="177" cy="112" rx="19" ry="24"/></g>
+              <g class="muscle-zone" data-muscle="biceps" tabindex="0" role="button" aria-label="Biceps"><ellipse cx="68" cy="164" rx="13" ry="30"/><ellipse cx="192" cy="164" rx="13" ry="30"/></g>
+              <g class="muscle-zone" data-muscle="abs" tabindex="0" role="button" aria-label="Abdominals"><rect x="116" y="144" width="28" height="58" rx="12"/></g>
+              <g class="muscle-zone" data-muscle="quads" tabindex="0" role="button" aria-label="Quadriceps"><ellipse cx="104" cy="266" rx="22" ry="50"/><ellipse cx="156" cy="266" rx="22" ry="50"/></g>
+              <g class="muscle-zone" data-muscle="calves" tabindex="0" role="button" aria-label="Calves"><ellipse cx="105" cy="337" rx="19" ry="38"/><ellipse cx="155" cy="337" rx="19" ry="38"/></g>
+            </svg>
+          </div>
+          <div class="anatomy-figure" id="anatomy-back" aria-label="Back human muscle anatomy" hidden>
+            <svg viewBox="0 0 260 430" role="img" aria-label="Back view selectable human muscles">
+              <ellipse cx="130" cy="38" rx="28" ry="34" class="body-skin"/>
+              <path d="M102 72c-20 12-29 27-36 50l-18 78 27 7 21-68 34 35 34-35 21 68 27-7-18-78c-7-23-16-38-36-50z" class="body-skin"/>
+              <g class="muscle-zone" data-muscle="traps" tabindex="0" role="button" aria-label="Trapezius"><path d="M130 78c-21 8-34 20-42 38l42 25 42-25c-8-18-21-30-42-38z"/></g>
+              <g class="muscle-zone" data-muscle="shoulders" tabindex="0" role="button" aria-label="Back shoulders"><ellipse cx="83" cy="112" rx="19" ry="24"/><ellipse cx="177" cy="112" rx="19" ry="24"/></g>
+              <g class="muscle-zone" data-muscle="triceps" tabindex="0" role="button" aria-label="Triceps"><ellipse cx="68" cy="164" rx="13" ry="30"/><ellipse cx="192" cy="164" rx="13" ry="30"/></g>
+              <g class="muscle-zone" data-muscle="lats" tabindex="0" role="button" aria-label="Latissimus dorsi"><path d="M130 130c-26 3-39 17-43 44l43 41 43-41c-4-27-17-41-43-44z"/></g>
+              <g class="muscle-zone" data-muscle="lowerback" tabindex="0" role="button" aria-label="Lower back"><rect x="112" y="205" width="36" height="52" rx="14"/></g>
+              <g class="muscle-zone" data-muscle="glutes" tabindex="0" role="button" aria-label="Glutes"><ellipse cx="105" cy="255" rx="25" ry="34"/><ellipse cx="155" cy="255" rx="25" ry="34"/></g>
+              <g class="muscle-zone" data-muscle="hamstrings" tabindex="0" role="button" aria-label="Hamstrings"><ellipse cx="104" cy="315" rx="21" ry="43"/><ellipse cx="156" cy="315" rx="21" ry="43"/></g>
+              <g class="muscle-zone" data-muscle="calves" tabindex="0" role="button" aria-label="Calves"><ellipse cx="105" cy="365" rx="18" ry="34"/><ellipse cx="155" cy="365" rx="18" ry="34"/></g>
+            </svg>
+          </div>
+          <aside class="muscle-results" id="muscle-results">
+            <p class="eyebrow">SELECT A MUSCLE</p>
+            <h3>Choose a highlighted area</h3>
+            <p>View exercises, sets, repetitions, and instructions for that muscle.</p>
+          </aside>
+        </div>
+      </section>
       <div class="workout-banner"><div><span class="pill pill-light">YOUR MOVEMENT MENU</span><h2>Showing up counts.<br>Every time.</h2><p>Explore strength, cardio, mobility, and more. Go at a pace that feels comfortable for you.</p></div><div class="banner-stamp" aria-hidden="true"><span>✳</span><small>MADE FOR<br>REAL LIFE</small></div></div>
       <section class="section-block">
         <div class="section-heading"><div><p class="eyebrow">PICK WHAT FEELS RIGHT</p><h2>Explore movement</h2></div><span id="workout-completion" class="section-note" aria-live="polite"></span></div>
@@ -119,6 +306,48 @@
 
     <section id="nutrition" class="view page-shell" data-view hidden>
       <div class="page-intro"><p class="eyebrow"><span class="eyebrow-line"></span> NOURISHMENT WITHOUT THE RULEBOOK</p><h1>Eat well. <span>Feel good.</span></h1><p class="welcome-copy">Flexible meal ideas, simple food swaps, and helpful basics—because eating well should fit real life.</p></div>
+      <section class="nutrition-planner" aria-labelledby="nutrition-planner-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">ILLUSTRATIVE DAILY TARGETS</p><h2 id="nutrition-planner-heading">Your student-friendly meal plan</h2></div>
+          <label class="nutrition-phase">Phase
+            <select id="nutrition-phase">
+              <option value="maintain">Maintain</option>
+              <option value="cut">Cutting</option>
+              <option value="bulk">Bulking</option>
+            </select>
+          </label>
+        </div>
+        <p class="estimate-note">All calories, macros, and portions are approximate fictional examples, not personal targets or medical advice.</p>
+        <div id="nutrition-targets" class="nutrition-targets"></div>
+        <div id="daily-meals" class="daily-meals"></div>
+      </section>
+      <section class="workout-nutrition" aria-labelledby="workout-nutrition-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">MEALS AROUND TRAINING</p><h2 id="workout-nutrition-heading">Fuel before and recover after</h2></div>
+          <span id="training-time" class="pill"></span>
+        </div>
+        <div class="timed-meal-grid">
+          <article class="timed-meal"><span class="eyebrow">PRE-WORKOUT</span><h3 id="pre-workout-meal"></h3><p id="pre-workout-detail"></p></article>
+          <article class="timed-meal"><span class="eyebrow">POST-WORKOUT</span><h3 id="post-workout-meal"></h3><p id="post-workout-detail"></p></article>
+        </div>
+        <div class="fuel-guidance">
+          <p><strong>Carbohydrates</strong> provide available fuel for working muscles and can help maintain training intensity.</p>
+          <p><strong>Protein</strong> supplies amino acids that support muscle repair and adaptation after exercise.</p>
+          <p><strong>Hydration:</strong> Drink regularly through the day; begin a session normally hydrated, sip as needed during longer or hotter sessions, and replace fluids afterward based on thirst and body size.</p>
+        </div>
+      </section>
+      <section class="food-library" aria-labelledby="food-library-heading">
+        <div class="section-heading">
+          <div><p class="eyebrow">SEARCH · LEARN · COMPARE</p><h2 id="food-library-heading">Food information</h2></div>
+          <input id="food-search" class="food-search" type="search" placeholder="Search oats, eggs, lentils…" aria-label="Search foods">
+        </div>
+        <div class="food-compare-controls">
+          <label>Compare<select id="food-compare-a"></select></label>
+          <label>with<select id="food-compare-b"></select></label>
+        </div>
+        <div id="food-compare" class="food-compare"></div>
+        <div id="food-results" class="food-results"></div>
+      </section>
       <div class="nutrition-highlight"><div><span class="pill pill-light">A SIMPLE PLACE TO BEGIN</span><h2>Balance isn’t<br>about being <span>perfect.</span></h2><p>Try pairing a satisfying source of energy with something that helps you feel nourished. Your needs are personal; there’s no one-size-fits-all plate.</p></div><div class="plate-art" aria-label="Illustration of a colourful balanced plate"><div class="plate plate-one"></div><div class="plate plate-two"></div><div class="plate plate-three"></div><span class="plate-sprig">✳</span></div></div>
       <section class="section-block">
         <div class="section-heading"><div><p class="eyebrow">EASY IDEAS, ZERO PRESSURE</p><h2>Pick a meal to explore</h2></div><label class="meal-filter-label">Plan for <select id="meal-day"><option value="day">A typical day</option><option value="busy">A busy day</option><option value="plant">Plant-forward</option></select></label></div>
@@ -128,7 +357,7 @@
         <div class="section-heading"><div><p class="eyebrow">A LITTLE FLEXIBILITY GOES A LONG WAY</p><h2>Simple food swaps</h2></div></div>
         <div id="swap-grid" class="swap-grid"></div>
       </section>
-      <aside class="gentle-note"><span class="note-icon" aria-hidden="true">✳</span><p><strong>Food is personal.</strong> These are general ideas, not a medical nutrition plan. Allergies, health conditions, and nutrition needs vary; ask a qualified professional for advice that’s right for you.</p></aside>
+      <aside class="gentle-note health-disclaimer"><span class="note-icon" aria-hidden="true">✳</span><p><strong>General health disclaimer:</strong> This student prototype provides fictional sample plans and broad educational information, not medical or dietetic advice. Nutrition values and targets are estimates, not prescriptions. Do not use the examples as a substitute for advice from a qualified professional. Food suggestions are not allergen-safe guarantees; check labels and ingredients yourself.</p></aside>
     </section>
 
     <section id="progress" class="view page-shell" data-view hidden>
@@ -136,25 +365,16 @@
       <div class="progress-layout">
         <div class="progress-main">
           <section class="progress-panel"><div class="section-heading compact-heading"><div><p class="eyebrow">A LOOK BACK AT TODAY</p><h2>Your wellness snapshot</h2></div><span class="pill" id="log-count">JUST FOR YOU</span></div><div id="progress-summary" class="summary-grid"></div></section>
-          <section class="progress-panel history-panel"><div class="section-heading compact-heading"><div><p class="eyebrow">YOUR PERSONAL TIMELINE</p><h2>Recent check-ins</h2></div><button id="clear-progress" type="button" class="quiet-button">Clear history</button></div><div id="progress-history"></div></section>
+          <section class="progress-panel history-panel"><div class="section-heading compact-heading"><div><p class="eyebrow">THIS SESSION</p><h2>Completed workouts</h2></div><button id="clear-progress" type="button" class="quiet-button">Reset demo progress</button></div><div id="progress-history"></div></section>
         </div>
-        <aside class="progress-aside">
-          <form id="progress-form" class="log-form">
-            <p class="eyebrow">A MOMENT FOR YOU</p><h2>Log a check-in</h2><p class="form-intro">A few words about today can be a lovely reminder later.</p>
-            <label for="log-activity">What did you do?</label><select id="log-activity"><option>Strength & movement</option><option>Cardio & fresh air</option><option>Stretching & mobility</option><option>Rest & recovery</option><option>Balanced meals</option><option>Time for myself</option></select>
-            <label for="log-note">Anything you’d like to remember? <span class="optional">(optional)</span></label><textarea id="log-note" rows="3" maxlength="160" placeholder="I took the scenic route on my walk…"></textarea>
-            <button class="button button-primary full-button" type="submit">Save today’s moment <span aria-hidden="true">→</span></button>
-            <p class="privacy-note"><span aria-hidden="true">◉</span> Your check-ins stay in this browser.</p>
-          </form>
-          <div class="kindness-card"><span aria-hidden="true">✳</span><p>You don’t have to do it all. Doing one thing with care is a wonderful place to start.</p></div>
-        </aside>
+        <aside class="progress-aside"><div class="kindness-card"><span aria-hidden="true">✳</span><p>Progress indicators reflect this browser session only. Refreshing resets completion marks.</p></div></aside>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
-    <a class="brand footer-brand" href="#home"><span class="brand-mark" aria-hidden="true">A</span><span>ascend<span class="brand-light">catalyst</span></span></a>
-    <p>A little more well, every day. <span>·</span> Student prototype for BSAD 281 at St. Francis Xavier University. Not a real company—data is fictional.</p>
+    <a class="brand footer-brand" href="#home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="mitochondrion-shell" d="M5.2 13.1C7.1 6.4 15.6 3.5 23 6.2c6.1 2.2 7.6 8.5 3.5 14.5-4 5.8-14.4 8.1-20.3 4.5-3.4-2.1-2.5-7.1-1-12.1Z"/><path class="mitochondrion-fold" d="M8 11.4c2.2-2.8 5-2.7 6.2-.5 1.1 2.1-1.6 3.2-1.8 5.1-.2 1.8 2.5 2.2 3.3 4 .8 1.9-.2 3.3-1.9 3.8m2.8-17.2c1.9 1.1 2.3 2.7 1.2 4.1-1.1 1.4-2.8 2.2-2.1 4.1.6 1.6 3 1.9 3.6 3.7.4 1.2-.1 2.4-1.3 3.4m4-13.9c2.1 1.2 2.3 3.2 1.2 4.6-.9 1.2-2.2 2.1-1.7 3.7.3.9 1.2 1.5 2.2 1.9"/><circle class="mitochondrion-dot" cx="8.2" cy="21.4" r="1"/></svg></span><span>ascend<span class="brand-light">catalyst</span></span></a>
+    <p>Student prototype created for a university project. Not a real commercial service. General information only—not medical advice; nutrition values are estimates. Check all food labels for allergens.</p>
     <a href="#home" class="back-top">Back to top ↑</a>
   </footer>
   <script src="data.js"></script>

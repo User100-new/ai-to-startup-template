@@ -1,11 +1,9 @@
-// Ascend Catalyst interactions. Personal check-ins are stored in this browser.
+// Ascend Catalyst uses fictional recommendations and stores only demo preferences locally.
 (function () {
   "use strict";
 
   const STORE_KEY = "ascend-catalyst";
-  const today = new Date();
-  const todayKey = today.getFullYear() + "-" + String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
-  const emptyState = { goal: "", mood: "", water: 0, completed: [], history: [] };
+  const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionMeals: null, premium: false };
   let state = emptyState;
   let storageAvailable = true;
   const notice = document.getElementById("storage-notice");
@@ -14,15 +12,23 @@
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
       if (!saved || typeof saved !== "object") return emptyState;
-      const sameDay = saved.day === todayKey;
+      const preferences = saved.preferences && typeof saved.preferences === "object" ? saved.preferences : saved.profile || {};
       return {
-        goal: typeof saved.goal === "string" ? saved.goal : "",
-        mood: sameDay && typeof saved.mood === "string" ? saved.mood : "",
-        water: sameDay && Number.isInteger(saved.water) && saved.water >= 0 ? Math.min(saved.water, 8) : 0,
-        completed: sameDay && Array.isArray(saved.completed) ? saved.completed.filter(function (id) { return typeof id === "string"; }) : [],
-        history: Array.isArray(saved.history) ? saved.history.filter(function (entry) {
-          return entry && typeof entry.date === "string" && typeof entry.activity === "string";
-        }).slice(0, 30) : []
+        goal: typeof preferences.goal === "string" ? preferences.goal : "",
+        completed: [],
+        profile: typeof preferences.goal === "string" ? {
+          goal: ["strength", "fat-loss", "endurance", "health"].includes(preferences.goal) ? preferences.goal : "health",
+          experience: ["beginner", "intermediate", "advanced"].includes(preferences.experience) ? preferences.experience : "beginner",
+          activity: ["sedentary", "light", "active", "very-active"].includes(preferences.activity) ? preferences.activity : "light",
+          time: ["Morning", "Afternoon", "Evening", "Flexible"].includes(preferences.time) ? preferences.time : "Flexible",
+          diet: ["Flexible", "Vegetarian", "Vegan", "Plant-forward"].includes(preferences.diet) ? preferences.diet : "Flexible",
+          days: Array.isArray(preferences.days) ? preferences.days.filter(function (day) { return ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"].includes(day); }) : [],
+          equipment: Array.isArray(preferences.equipment) ? preferences.equipment.filter(function (item) { return ["None","Dumbbells","Resistance bands","Bench"].includes(item); }) : ["None"]
+        } : null,
+        schedule: null,
+        nutritionPhase: ["maintain", "cut", "bulk"].includes(preferences.nutritionPhase) ? preferences.nutritionPhase : "maintain",
+        nutritionMeals: null,
+        premium: preferences.premiumPreview === true || saved.premium === true
       };
     } catch (error) {
       storageAvailable = false;
@@ -33,12 +39,19 @@
   function saveState() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({
-        day: todayKey,
-        goal: state.goal,
-        mood: state.mood,
-        water: state.water,
-        completed: state.completed,
-        history: state.history
+        version: 2,
+        preferences: Object.assign({
+          nutritionPhase: state.nutritionPhase,
+          premiumPreview: state.premium
+        }, state.profile ? {
+          goal: state.profile.goal,
+          experience: state.profile.experience,
+          activity: state.profile.activity,
+          time: state.profile.time,
+          diet: state.profile.diet,
+          days: state.profile.days,
+          equipment: state.profile.equipment
+        } : {})
       }));
     } catch (error) {
       storageAvailable = false;
@@ -56,14 +69,6 @@
     return element;
   }
 
-  function dayFor(date) {
-    return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
-  }
-
-  function readableDate(value) {
-    return new Date(value + "T12:00:00").toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric" });
-  }
-
   function showStorageNotice() {
     if (!storageAvailable && notice) {
       notice.hidden = false;
@@ -72,6 +77,253 @@
   }
 
   state = readState();
+  saveState();
+
+  const EXERCISES = [
+    { name: "Chair squats", groups: "Quads · Glutes", reps: "3 × 8–12", rest: "60–90 sec", instructions: "Sit back toward a sturdy chair, keep your feet planted, then stand tall.", equipment: ["None"] },
+    { name: "Wall push-ups", groups: "Chest · Triceps", reps: "3 × 8–12", rest: "60 sec", instructions: "Place hands on a wall, keep a straight body line, and move your chest toward the wall.", equipment: ["None"] },
+    { name: "Glute bridges", groups: "Glutes · Hamstrings", reps: "3 × 10–15", rest: "60 sec", instructions: "Lie down, press through your feet, and lift your hips without arching your back.", equipment: ["None"] },
+    { name: "Supported rows", groups: "Back · Biceps", reps: "3 × 10–12", rest: "60–90 sec", instructions: "Use a resistance band or dumbbells. Pull elbows behind you and lower slowly.", equipment: ["Resistance bands", "Dumbbells"] },
+    { name: "Dumbbell floor press", groups: "Chest · Triceps", reps: "3 × 8–12", rest: "60–90 sec", instructions: "Lie safely on the floor and press dumbbells upward, keeping wrists stacked.", equipment: ["Dumbbells"] },
+    { name: "Reverse lunges", groups: "Quads · Glutes", reps: "2 × 8 each side", rest: "60 sec", instructions: "Step one foot backward, lower with control, and return to standing.", equipment: ["None"] },
+    { name: "Dead bug", groups: "Core", reps: "3 × 8 each side", rest: "45 sec", instructions: "Keep your lower back gently pressed down while extending opposite arm and leg.", equipment: ["None"] },
+    { name: "Bird dog", groups: "Core · Back", reps: "3 × 8 each side", rest: "45 sec", instructions: "From hands and knees, reach opposite arm and leg out, then return with control.", equipment: ["None"] },
+    { name: "Low-impact marching", groups: "Cardio · Hip flexors", reps: "3 × 2 min", rest: "30 sec", instructions: "March at a comfortable pace, adding arm movement if it feels good.", equipment: ["None"] },
+    { name: "Band biceps curls", groups: "Biceps", reps: "3 × 10–15", rest: "60 sec", instructions: "Stand on the band and curl while keeping elbows close to your sides.", equipment: ["Resistance bands"] },
+    { name: "Banded shoulder press", groups: "Shoulders · Triceps", reps: "3 × 8–12", rest: "60 sec", instructions: "Stand on the band, palms forward, and press hands overhead without leaning back.", equipment: ["Resistance bands"] }
+  ];
+
+  function selectedValues(name) {
+    return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(function (input) { return input.value; });
+  }
+
+  function buildSchedule(profile) {
+    const selectedDays = profile.days.length ? profile.days : ["Monday", "Wednesday", "Friday"];
+    const dayLimit = selectedDays.length;
+    const templates = profile.goal === "fat-loss"
+      ? [["Low-impact marching", "Chair squats", "Wall push-ups", "Dead bug"], ["Supported rows", "Glute bridges", "Reverse lunges", "Bird dog"], ["Low-impact marching", "Chair squats", "Banded shoulder press", "Dead bug"]]
+      : profile.goal === "endurance"
+      ? [["Low-impact marching", "Chair squats", "Bird dog", "Glute bridges"], ["Low-impact marching", "Wall push-ups", "Dead bug", "Reverse lunges"], ["Low-impact marching", "Supported rows", "Chair squats", "Glute bridges"]]
+      : [["Chair squats", "Wall push-ups", "Glute bridges", "Dead bug"], ["Supported rows", "Reverse lunges", "Band biceps curls", "Bird dog"], ["Dumbbell floor press", "Glute bridges", "Chair squats", "Dead bug"]];
+
+    return selectedDays.slice(0, dayLimit).map(function (day, index) {
+      const template = templates[index % templates.length];
+      return {
+        id: day.toLowerCase(),
+        day: day,
+        muscleGroups: index % 3 === 0 ? "Full body · Core" : index % 3 === 1 ? "Back · Legs · Core" : "Chest · Legs · Core",
+        completed: false,
+        exercises: template.map(function (name) {
+          const exercise = EXERCISES.find(function (item) { return item.name === name; });
+          const available = !exercise || exercise.equipment.every(function (item) { return item === "None" || profile.equipment.includes(item); });
+          return available ? { ...exercise } : { ...EXERCISES.find(function (item) { return item.name === "Chair squats"; }) };
+        })
+      };
+    });
+  }
+
+  function loadProfileForm() {
+    if (!state.profile) return;
+    const profile = state.profile;
+    document.getElementById("profile-goal").value = profile.goal || "";
+    document.getElementById("profile-experience").value = profile.experience || "";
+    document.getElementById("profile-activity").value = profile.activity || "";
+    document.getElementById("profile-time").value = profile.time || "Flexible";
+    document.getElementById("profile-diet").value = profile.diet || "Flexible";
+    document.querySelectorAll('input[name="days"]').forEach(function (input) { input.checked = profile.days.includes(input.value); });
+    document.querySelectorAll('input[name="equipment"]').forEach(function (input) { input.checked = profile.equipment.includes(input.value); });
+  }
+
+  function exerciseOptions(dayId, exerciseIndex) {
+    const scheduleDay = state.schedule.find(function (day) { return day.id === dayId; });
+    const choices = EXERCISES.map(function (exercise) {
+      return '<option value="' + exercise.name + '"' + (scheduleDay.exercises[exerciseIndex].name === exercise.name ? " selected" : "") + ">" + exercise.name + "</option>";
+    }).join("");
+    return choices;
+  }
+
+  function renderSchedule() {
+    const container = document.getElementById("weekly-plan");
+    if (!container) return;
+    container.replaceChildren();
+    if (!state.schedule) {
+      document.getElementById("plan-summary").textContent = "Complete the questionnaire above to create your first weekly plan.";
+      container.append(node("p", "plan-empty", "No schedule yet."));
+      return;
+    }
+    document.getElementById("plan-summary").textContent = state.profile
+      ? state.profile.days.length + " workout days · " + state.profile.experience + " level · " + state.profile.time + " training · " + state.profile.diet
+      : "Sample cardio schedule · customize it with your demo preferences.";
+    state.schedule.forEach(function (day) {
+      const card = node("article", "plan-day" + (day.completed ? " plan-completed" : ""));
+      card.append(node("div", "plan-day-heading", ""), node("h3", "", day.day), node("span", "eyebrow", day.muscleGroups));
+      const heading = card.querySelector(".plan-day-heading");
+      const complete = node("button", "plan-complete", day.completed ? "Completed ✓" : "Mark complete");
+      complete.type = "button";
+      complete.addEventListener("click", function () {
+        day.completed = !day.completed;
+        saveState();
+        renderSchedule();
+        renderDashboard();
+        renderProgress();
+      });
+      heading.append(complete);
+      day.exercises.forEach(function (exercise, exerciseIndex) {
+        const row = node("div", "exercise-row");
+        row.append(node("strong", "", exercise.name), node("span", "exercise-groups", exercise.groups));
+        const prescription = node("p", "exercise-prescription", exercise.reps + " · Rest " + exercise.rest);
+        const instructions = node("p", "exercise-instructions", exercise.instructions);
+        const substitute = node("button", "exercise-substitute", "Substitute");
+        substitute.type = "button";
+        substitute.addEventListener("click", function () {
+          const replacements = EXERCISES.filter(function (item) {
+            const availableEquipment = state.profile ? state.profile.equipment : ["None"];
+            return item.name !== exercise.name &&
+              item.equipment.every(function (equipment) { return equipment === "None" || availableEquipment.includes(equipment); }) &&
+              item.groups.split(" · ").some(function (group) { return exercise.groups.includes(group); });
+          });
+          const replacement = replacements[0] || EXERCISES.find(function (item) { return item.name === "Chair squats"; });
+          if (replacement) {
+            day.exercises[exerciseIndex] = { ...replacement };
+            saveState();
+            renderSchedule();
+          }
+        });
+        row.append(prescription, instructions);
+        if (!exercise.isCardio) row.append(substitute);
+        card.append(row);
+      });
+      container.append(card);
+    });
+  }
+
+  const CARDIO_ACTIVITIES = [
+    { id: "walk", name: "Brisk walking", duration: "20–30 min", level: "Beginner", intensity: "Easy–moderate", benefit: "Builds aerobic fitness and recovery-friendly movement.", goal: "All goals" },
+    { id: "run", name: "Interval running", duration: "15–20 min", level: "Intermediate", intensity: "Moderate–hard", benefit: "Improves cardiovascular capacity and time-efficient endurance.", goal: "Endurance or fat-loss" },
+    { id: "cycle", name: "Cycling", duration: "25–45 min", level: "All levels", intensity: "Easy–hard", benefit: "Low-impact cardio that supports legs and aerobic capacity.", goal: "Endurance or recovery" },
+    { id: "swim", name: "Swimming", duration: "20–40 min", level: "All levels", intensity: "Easy–moderate", benefit: "Full-body, low-impact cardio that reduces joint loading.", goal: "Overall health" },
+    { id: "hike", name: "Hiking", duration: "30–60 min", level: "Beginner+", intensity: "Easy–moderate", benefit: "Combines aerobic work with outdoor movement and gradual progression.", goal: "All goals" },
+    { id: "dance", name: "Dance or aerobics", duration: "20–30 min", level: "All levels", intensity: "Moderate", benefit: "Engaging cardio that improves coordination and consistency.", goal: "Fat-loss or health" }
+  ];
+
+  const MUSCLE_WORKOUTS = {
+    chest: [{name:"Push-ups",prescription:"3 × 8–15","rest":"60–90 sec",instructions:"Keep a straight body line and lower with control."},{name:"Incline push-ups",prescription:"3 × 10–12",rest:"60 sec",instructions:"Use a counter or sturdy bench to make the movement easier."},{name:"Floor dumbbell press",prescription:"3 × 8–12",rest:"90 sec",instructions:"Press dumbbells upward while keeping wrists stacked."}],
+    shoulders: [{name:"Pike push-ups",prescription:"3 × 6–10",rest:"90 sec",instructions:"Keep elbows close and reach the top of your head toward the floor."},{name:"Band overhead press",prescription:"3 × 8–12",rest:"60–90 sec",instructions:"Press without leaning backward."},{name:"Lateral raises",prescription:"2–3 × 10–15",rest:"60 sec",instructions:"Raise arms slightly below shoulder height with soft elbows."}],
+    biceps: [{name:"Band curls",prescription:"3 × 10–15",rest:"60 sec",instructions:"Stand on the band and curl while keeping elbows close."},{name:"Hammer curls",prescription:"3 × 8–12",rest:"60 sec",instructions:"Use a neutral grip and lower dumbbells slowly."},{name:"Chin-ups",prescription:"2–3 × 5–10",rest:"90 sec",instructions:"Use assistance if needed and lead with the chest."}],
+    triceps: [{name:"Close-grip push-ups",prescription:"3 × 6–12",rest:"60–90 sec",instructions:"Keep elbows close to the body."},{name:"Overhead extensions",prescription:"3 × 10–12",rest:"60 sec",instructions:"Lower behind the head and keep elbows facing forward."},{name:"Bench dips",prescription:"2–3 × 8–12",rest:"60 sec",instructions:"Use a sturdy bench and keep the shoulders away from the ears."}],
+    abs: [{name:"Dead bug",prescription:"3 × 8 each side",rest:"45 sec",instructions:"Press your back gently into the floor while extending opposite limbs."},{name:"Forearm plank",prescription:"3 × 20–45 sec",rest:"45 sec",instructions:"Keep ribs down and avoid letting hips sag."},{name:"Reverse crunch",prescription:"3 × 10–15",rest:"45 sec",instructions:"Curl the pelvis toward the ribs without swinging."}],
+    quads: [{name:"Chair squats",prescription:"3 × 8–12",rest:"60–90 sec",instructions:"Sit back toward a chair and stand through the whole foot."},{name:"Reverse lunges",prescription:"3 × 8 each side",rest:"60–90 sec",instructions:"Step back softly and keep the front knee aligned."},{name:"Step-ups",prescription:"3 × 8–12 each side",rest:"60 sec",instructions:"Use a sturdy low step and drive through the working leg."}],
+    calves: [{name:"Standing calf raises",prescription:"3 × 12–20",rest:"45–60 sec",instructions:"Rise onto the toes, pause, then lower slowly."},{name:"Seated calf raises",prescription:"3 × 12–15",rest:"45 sec",instructions:"Keep the ankle controlled and the toes pointed forward."},{name:"Farmer walks",prescription:"3 × 30–45 sec",rest:"60 sec",instructions:"Walk tall with light weights and avoid shrugging."}],
+    traps: [{name:"Shrugs",prescription:"3 × 12–15",rest:"60 sec",instructions:"Lift shoulders straight upward without rolling them."},{name:"Prone Y raises",prescription:"3 × 8–12",rest:"60 sec",instructions:"Raise arms into a Y while keeping the neck long."},{name:"Face pulls",prescription:"3 × 12–15",rest:"60 sec",instructions:"Pull a band toward the forehead and separate the hands."}],
+    lats: [{name:"Band rows",prescription:"3 × 10–15",rest:"60–90 sec",instructions:"Pull elbows behind you and lower with control."},{name:"Lat pulldown",prescription:"3 × 8–12",rest:"90 sec",instructions:"Pull toward the upper chest without leaning excessively."},{name:"Assisted pull-ups",prescription:"3 × 5–10",rest:"90 sec",instructions:"Pull elbows down and keep ribs gently tucked."}],
+    lowerback: [{name:"Bird dog",prescription:"3 × 8 each side",rest:"45 sec",instructions:"Reach opposite limbs without twisting or arching."},{name:"Back extensions",prescription:"3 × 10–12",rest:"60 sec",instructions:"Lift with the glutes and keep the movement comfortable."},{name:"Good mornings",prescription:"2–3 × 10–12",rest:"60 sec",instructions:"Hinge at the hips with a neutral spine."}],
+    glutes: [{name:"Glute bridges",prescription:"3 × 10–15",rest:"60 sec",instructions:"Press through the feet and lift without arching."},{name:"Hip thrusts",prescription:"3 × 8–12",rest:"90 sec",instructions:"Use a sturdy bench and keep the chin tucked."},{name:"Kickbacks",prescription:"3 × 10–12 each side",rest:"45–60 sec",instructions:"Extend the leg from the hip without rotating the pelvis."}],
+    hamstrings: [{name:"Romanian deadlift",prescription:"3 × 8–12",rest:"90 sec",instructions:"Hinge the hips and keep weights close to the legs."},{name:"Hamstring walks",prescription:"3 × 20–30 sec",rest:"60 sec",instructions:"Move in a glute bridge position with small steps."},{name:"Sliding curls",prescription:"3 × 8–12",rest:"60 sec",instructions:"Press heels into sliders and curl the hips upward."}]
+  };
+
+  function renderMuscleMuscle(muscle) {
+    const results = document.getElementById("muscle-results");
+    if (!results) return;
+    const title = muscle.replace("lowerback","Lower back").replace("lats","Latissimus dorsi").replace("abs","Abdominals").replace("quads","Quadriceps");
+    results.replaceChildren();
+    results.append(node("p","eyebrow","MUSCLE: " + title.toUpperCase()), node("h3","",title.charAt(0).toUpperCase() + title.slice(1) + " exercises"));
+    (MUSCLE_WORKOUTS[muscle] || []).forEach(function (exercise) {
+      const card = node("article","muscle-exercise");
+      card.append(node("strong","",exercise.name), node("span","muscle-prescription",exercise.prescription + " · Rest " + exercise.rest), node("p","",exercise.instructions));
+      results.append(card);
+    });
+  }
+
+  function initializeMuscleExplorer() {
+    document.querySelectorAll(".anatomy-view").forEach(function (button) {
+      button.addEventListener("click", function () {
+        document.querySelectorAll(".anatomy-view").forEach(function (item) { item.classList.toggle("active", item === button); });
+        document.getElementById("anatomy-front").hidden = button.dataset.anatomy !== "front";
+        document.getElementById("anatomy-back").hidden = button.dataset.anatomy !== "back";
+      });
+    });
+    document.querySelectorAll(".muscle-zone").forEach(function (zone) {
+      const selectMuscle = function () {
+        document.querySelectorAll(".muscle-zone").forEach(function (item) { item.classList.remove("selected"); });
+        zone.classList.add("selected");
+        renderMuscleMuscle(zone.dataset.muscle);
+      };
+      zone.addEventListener("click", selectMuscle);
+      zone.addEventListener("keydown", function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectMuscle(); } });
+    });
+  }
+
+  function renderCardioPlanner() {
+    const options = document.getElementById("cardio-options");
+    const daySelect = document.getElementById("cardio-day");
+    if (!options || !daySelect) return;
+    daySelect.replaceChildren();
+    const workoutDays = state.schedule ? state.schedule.map(function (day) { return day.day; }) : ["Monday", "Wednesday", "Friday"];
+    workoutDays.forEach(function (day) {
+      daySelect.append(new Option(day, day));
+    });
+    options.replaceChildren();
+    CARDIO_ACTIVITIES.forEach(function (activity) {
+      let suitable = true;
+      if (state.profile && state.profile.experience === "beginner") {
+        suitable = activity.level !== "Intermediate";
+      }
+      if (!suitable) return;
+      const card = node("article", "cardio-card");
+      card.append(
+        node("span", "eyebrow", activity.level + " · " + activity.intensity),
+        node("h3", "", activity.name),
+        node("p", "cardio-duration", activity.duration),
+        node("p", "cardio-benefit", activity.benefit),
+        node("span", "cardio-goal", "Best for: " + activity.goal)
+      );
+      const add = node("button", "cardio-add", "Add to schedule");
+      add.type = "button";
+      add.addEventListener("click", function () {
+        if (!state.schedule) {
+          state.schedule = workoutDays.map(function (day) { return { id: day.toLowerCase(), day: day, muscleGroups: "General movement", completed: false, exercises: [] }; });
+        }
+        const day = state.schedule.find(function (item) { return item.day === daySelect.value; });
+        if (!day) return;
+        const exists = day.exercises.some(function (exercise) { return exercise.name === activity.name; });
+        if (!exists) {
+          day.exercises.push({
+            name: activity.name,
+            groups: "Cardio · " + activity.intensity,
+            reps: activity.duration,
+            rest: "Finish with 3–5 min easy movement",
+            instructions: activity.benefit,
+            isCardio: true
+          });
+          saveState();
+          renderSchedule();
+          add.textContent = "Added ✓";
+        }
+      });
+      card.append(add);
+      options.append(card);
+    });
+  }
+
+  function renderWorkoutNutrition() {
+    const time = document.getElementById("training-time");
+    const preTitle = document.getElementById("pre-workout-meal");
+    const preDetail = document.getElementById("pre-workout-detail");
+    const postTitle = document.getElementById("post-workout-meal");
+    const postDetail = document.getElementById("post-workout-detail");
+    if (!time || !preTitle || !preDetail || !postDetail) return;
+    const postTitleEl = document.getElementById("post-workout-meal");
+    const trainingTime = state.profile ? state.profile.time : "Flexible";
+    time.textContent = trainingTime + " training";
+    preTitle.textContent = trainingTime === "Morning"
+      ? "Banana, oats, or toast"
+      : "Oats, fruit, rice, or a small sandwich";
+    preDetail.textContent = trainingTime === "Morning"
+      ? "Eat 30–90 minutes before training if it feels comfortable. Keep the portion light and emphasize easy carbohydrate."
+      : "Have a carbohydrate-focused snack 1–3 hours before exercise. Add a modest protein portion if the gap before training is longer.";
+    postTitleEl.textContent = "Rice or potatoes with lentils, beans, tofu, or chicken";
+    postDetail.textContent = "Eat a balanced meal within a few hours afterward. Combine protein for muscle repair with carbohydrates to replenish fuel and include fruit or vegetables.";
+  }
 
   function showView() {
     const requested = location.hash.slice(1) || "home";
@@ -111,36 +363,6 @@
     });
   }
 
-  document.querySelectorAll(".mood-button").forEach(function (button) {
-    function update() {
-      const selected = state.mood === button.dataset.mood;
-      button.classList.toggle("selected", selected);
-      button.setAttribute("aria-pressed", selected ? "true" : "false");
-    }
-    update();
-    button.addEventListener("click", function () {
-      state.mood = state.mood === button.dataset.mood ? "" : button.dataset.mood;
-      saveState();
-      document.querySelectorAll(".mood-button").forEach(update);
-      document.getElementById("mood-status").textContent = state.mood
-        ? "Thanks for checking in: " + state.mood.toLowerCase() + "."
-        : "A quick check-in, just for you.";
-    });
-  });
-  if (state.mood) document.getElementById("mood-status").textContent = "Thanks for checking in: " + state.mood.toLowerCase() + ".";
-
-  function renderWater() {
-    const bar = document.getElementById("water-progress");
-    bar.style.width = Math.min(state.water / 8 * 100, 100) + "%";
-    document.getElementById("water-count").textContent = state.water + (state.water === 1 ? " glass logged" : " glasses logged");
-  }
-  document.getElementById("water-add").addEventListener("click", function () {
-    state.water += 1;
-    saveState();
-    renderWater();
-  });
-  renderWater();
-
   let activeFilter = "Everything";
   const filterContainer = document.getElementById("workout-filters");
 
@@ -152,9 +374,13 @@
     }).forEach(function (workout) {
       const card = node("article", "program-card");
       const visual = node("div", "program-visual visual-" + workout.color);
-      const icon = node("span", "program-art-icon", workout.icon);
-      icon.setAttribute("aria-hidden", "true");
-      visual.append(icon, node("span", "pill program-duration", workout.duration));
+      const photo = node("img", "workout-photo");
+      photo.src = workout.image;
+      photo.alt = workout.imageAlt;
+      photo.loading = "lazy";
+      visual.append(photo);
+      visual.append(node("span", "pill program-muscle", workout.muscleFocus));
+      visual.append(node("span", "pill program-duration", workout.duration));
       const content = node("div", "program-content");
       content.append(
         node("span", "eyebrow", workout.level),
@@ -172,6 +398,8 @@
           : state.completed.concat(workout.id);
         saveState();
         renderWorkouts();
+        renderDashboard();
+        renderProgress();
       });
       content.append(button);
       card.append(visual, content);
@@ -200,16 +428,281 @@
   renderFilters();
   renderWorkouts();
 
+  const FOODS = [
+    { name: "Rolled oats", calories: 379, protein: 13.2, carbs: 67.7, fat: 6.5, fibre: 10.1, portion: "100 g dry", vitamins: "B1, B5", minerals: "Magnesium, iron", benefits: "Slow-release energy and soluble fibre for fuller meals.", alternatives: ["Whole-grain cereal", "Brown rice"] },
+    { name: "Eggs", calories: 143, protein: 12.6, carbs: 0.7, fat: 9.5, fibre: 0, portion: "2 large eggs", vitamins: "A, D, B12", minerals: "Selenium, phosphorus", benefits: "Affordable complete protein and nutrients for muscle and cell health.", alternatives: ["Greek yogurt", "Tofu"] },
+    { name: "Brown rice", calories: 123, protein: 2.7, carbs: 25.6, fat: 1, fibre: 1.6, portion: "1 cup cooked", vitamins: "B3, B6", minerals: "Magnesium, manganese", benefits: "Provides budget-friendly carbohydrate and steady fuel.", alternatives: ["Quinoa", "Whole-wheat pasta"] },
+    { name: "Lentils", calories: 116, protein: 9, carbs: 20.1, fat: 0.4, fibre: 7.9, portion: "1 cup cooked", vitamins: "B1, folate", minerals: "Iron, potassium", benefits: "Fibre-rich plant protein that supports fullness and digestion.", alternatives: ["Chickpeas", "Black beans"] },
+    { name: "Chicken breast", calories: 165, protein: 31, carbs: 0, fat: 3.6, fibre: 0, portion: "100 g cooked", vitamins: "B3, B6", minerals: "Selenium, phosphorus", benefits: "High-protein, low-fat choice for muscle recovery.", alternatives: ["Turkey", "Tofu"] },
+    { name: "Greek yogurt", calories: 124, protein: 17, carbs: 6.6, fat: 3.2, fibre: 0, portion: "170 g", vitamins: "B12", minerals: "Calcium, phosphorus", benefits: "Convenient protein and calcium-rich snack or breakfast.", alternatives: ["Cottage cheese", "Skyr"] },
+    { name: "Peanut butter", calories: 588, protein: 25, carbs: 20, fat: 50, fibre: 6, portion: "100 g", vitamins: "E, B3", minerals: "Magnesium, potassium", benefits: "Energy-dense source of unsaturated fat and plant protein.", alternatives: ["Sunflower seed butter", "Mixed nuts"] },
+    { name: "Mixed vegetables", calories: 65, protein: 3, carbs: 13, fat: 0.5, fibre: 4.5, portion: "1.5 cups", vitamins: "A, C, K", minerals: "Potassium, folate", benefits: "Adds fibre, colour, and micronutrients to meals.", alternatives: ["Fresh vegetables", "Frozen stir-fry mix"] },
+    { name: "Banana", calories: 89, protein: 1.1, carbs: 22.8, fat: 0.3, fibre: 2.6, portion: "1 medium", vitamins: "B6, C", minerals: "Potassium", benefits: "Portable carbohydrate for pre- or post-workout fuel.", alternatives: ["Apple", "Berries"] },
+    { name: "Black beans", calories: 132, protein: 8.9, carbs: 23.7, fat: 0.5, fibre: 8.7, portion: "1 cup cooked", vitamins: "B1, folate", minerals: "Iron, magnesium", benefits: "Low-cost fibre and plant protein for filling meals.", alternatives: ["Lentils", "Chickpeas"] }
+  ];
+
+  const FOOD_PHOTOS = {
+    breakfast: "assets/foods/oatmeal-bowl.jpg",
+    lunch: "assets/foods/grain-and-vegetable-bowl.jpg",
+    dinner: "assets/foods/chicken-and-vegetables.jpg",
+    snack: "assets/foods/peanut-butter-banana-toast.jpg",
+    oats: "assets/foods/oatmeal-bowl.jpg",
+    egg: "assets/foods/eggs-on-toast.jpg",
+    grain: "assets/foods/grain-and-vegetable-bowl.jpg",
+    beans: "assets/foods/vegetable-and-bean-salad.jpg",
+    lentils: "assets/foods/lentils.jpg",
+    blackBeans: "assets/foods/black-beans.jpg",
+    protein: "assets/foods/chicken-and-vegetables.jpg",
+    dairy: "assets/foods/yogurt-and-berries.jpg",
+    spread: "assets/foods/peanut-butter-banana-toast.jpg",
+    greens: "assets/foods/fresh-vegetables.jpg",
+    fruit: "assets/foods/bananas.jpg",
+    plantLunch: "assets/foods/vegetable-and-bean-salad.jpg",
+    plantDinner: "assets/foods/grain-and-vegetable-bowl.jpg",
+    chickenLunch: "assets/foods/chicken-and-vegetables.jpg",
+    chickenDinner: "assets/foods/chicken-and-vegetables.jpg"
+  };
+
+  function foodImage(kind, alt, className) {
+    const image = node("img", className || "food-photo");
+    image.src = FOOD_PHOTOS[kind] || FOOD_PHOTOS.grain;
+    image.alt = alt;
+    image.loading = "lazy";
+    return image;
+  }
+
+  function foodArtType(foodName) {
+    if (foodName === "Rolled oats") return "oats";
+    if (foodName === "Eggs") return "egg";
+    if (foodName === "Brown rice") return "grain";
+    if (foodName === "Lentils") return "lentils";
+    if (foodName === "Black beans") return "blackBeans";
+    if (foodName === "Chicken breast") return "protein";
+    if (foodName === "Greek yogurt") return "dairy";
+    if (foodName === "Peanut butter") return "spread";
+    if (foodName === "Mixed vegetables") return "greens";
+    if (foodName === "Banana") return "fruit";
+    return "grain";
+  }
+
+  function nutritionTargets() {
+    const activityEstimate = { sedentary: 1800, light: 2000, active: 2200, "very-active": 2400 }[state.profile && state.profile.activity] || 2000;
+    const phase = state.nutritionPhase;
+    const calories = activityEstimate + (phase === "bulk" ? 150 : phase === "cut" ? -150 : 0);
+    const protein = Math.round(calories * 0.2 / 4);
+    const fat = Math.round(calories * 0.3 / 9);
+    const carbs = Math.max(50, Math.round((calories - protein * 4 - fat * 9) / 4));
+    return { calories: calories, protein: protein, carbs: carbs, fat: fat, label: "Illustrative " + phase + " estimate" };
+  }
+
+  function buildDailyMeals() {
+    const targets = nutritionTargets();
+    const plantBased = state.profile && ["Vegetarian", "Vegan", "Plant-forward"].includes(state.profile.diet);
+    const proteinFood = plantBased ? "lentils" : "chicken";
+    return [
+      { type: "Breakfast", title: state.profile && state.profile.diet === "Vegan" ? "Oats, soy drink & banana" : "Oats, yogurt & banana", portion: state.profile && state.profile.diet === "Vegan" ? "1 bowl + 1 cup soy drink" : "1 bowl + 170 g yogurt", calories: Math.round(targets.calories * .25), protein: Math.round(targets.protein * .23), carbs: Math.round(targets.carbs * .25), fat: Math.round(targets.fat * .22), foodKey: "breakfast", alternatives: state.profile && state.profile.diet === "Vegan" ? ["Oats + soy yogurt", "Tofu scramble + toast"] : ["Oats + eggs", "Greek yogurt + oats"] },
+      { type: "Lunch", title: proteinFood === "lentils" ? "Chickpea & vegetable bowl" : "Chicken & vegetable bowl", portion: "1 large bowl", calories: Math.round(targets.calories * .30), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .30), fat: Math.round(targets.fat * .27), foodKey: plantBased ? "plantLunch" : "chickenLunch", alternatives: plantBased ? ["Beans + rice", "Tofu + whole-wheat pasta"] : ["Beans + rice", "Whole-wheat pasta + chicken"] },
+      { type: "Dinner", title: proteinFood === "lentils" ? "Grain & vegetable bowl" : "Chicken & vegetables", portion: "1 plate", calories: Math.round(targets.calories * .32), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .32), fat: Math.round(targets.fat * .32), foodKey: plantBased ? "plantDinner" : "chickenDinner", alternatives: ["Tofu stir-fry", "Lentil pasta + vegetables"] },
+      { type: "Snack", title: "Banana & peanut butter", portion: "1 banana + 1 tbsp", calories: Math.round(targets.calories * .13), protein: Math.round(targets.protein * .13), carbs: Math.round(targets.carbs * .13), fat: Math.round(targets.fat * .19), foodKey: "snack", alternatives: plantBased ? ["Soy yogurt + fruit", "Hummus + toast"] : ["Greek yogurt + fruit", "Boiled eggs + fruit"] }
+    ];
+  }
+
+  function mealPhotoKind(meal) {
+    const title = meal.title.toLowerCase();
+    if (title.includes("oat")) return "breakfast";
+    if (title.includes("egg")) return "egg";
+    if (title.includes("yogurt")) return "dairy";
+    if (title.includes("peanut") || title.includes("banana")) return "snack";
+    if (title.includes("lentil")) return "lentils";
+    if (title.includes("bean") || title.includes("chickpea") || title.includes("hummus")) return "beans";
+    if (title.includes("chicken")) return "protein";
+    if (title.includes("tofu")) return "plantDinner";
+    if (title.includes("grain") || title.includes("vegetable") || title.includes("rice")) return "lunch";
+    return meal.foodKey;
+  }
+
+  function renderDashboard() {
+    const week = document.getElementById("dashboard-week");
+    if (!week) return;
+    const schedule = state.schedule || [];
+    week.replaceChildren();
+    const upcoming = schedule.slice(0, 4);
+    if (!upcoming.length) {
+      week.append(node("p", "dashboard-empty", "Complete your questionnaire to add workouts to this week."));
+    }
+    upcoming.forEach(function (day) {
+      const row = node("article", "dashboard-week-row" + (day.completed ? " completed" : ""));
+      const cardio = day.exercises.filter(function (exercise) { return ["walk","running","cycling","swimming","hiking","dance"].some(function (name) { return exercise.name.toLowerCase().includes(name); }); }).length;
+      row.append(
+        node("span", "dashboard-week-day", day.day.slice(0, 3)),
+        node("div", "", day.muscleGroups),
+        node("span", "dashboard-week-status", day.completed ? "Done" : cardio ? "Strength + cardio" : "Planned")
+      );
+      week.append(row);
+    });
+
+    const targets = nutritionTargets();
+    const targetContainer = document.getElementById("dashboard-targets");
+    targetContainer.replaceChildren();
+    [
+      ["Calories", targets.calories + " kcal"],
+      ["Protein", targets.protein + " g"],
+      ["Carbs", targets.carbs + " g"],
+      ["Fats", targets.fat + " g"]
+    ].forEach(function (target) {
+      const item = node("article", "dashboard-target");
+      item.append(node("span", "", target[0]), node("strong", "", target[1]));
+      targetContainer.append(item);
+    });
+
+    const meals = state.nutritionMeals || buildDailyMeals();
+    state.nutritionMeals = meals;
+    const mealContainer = document.getElementById("dashboard-meals");
+    mealContainer.replaceChildren();
+    meals.slice(0, 3).forEach(function (meal) {
+      const item = node("article", "dashboard-meal");
+      item.append(node("span", "eyebrow", meal.type), node("strong", "", meal.title), node("span", "dashboard-meal-calories", meal.calories + " kcal"));
+      mealContainer.append(item);
+    });
+
+    const completed = schedule.filter(function (day) { return day.completed; }).length + state.completed.length;
+    document.getElementById("dashboard-completed").textContent = String(completed);
+    document.getElementById("dashboard-completed-note").textContent = completed === 1 ? "workout completed" : "workouts completed";
+    const total = Math.max(schedule.length + WORKOUTS.length, 1);
+    const percentage = Math.min(100, Math.round(completed / total * 100));
+    document.getElementById("dashboard-ring-value").textContent = percentage + "%";
+    document.getElementById("dashboard-progress-ring").style.setProperty("--progress", percentage + "%");
+
+    const cardioCount = schedule.reduce(function (count, day) {
+      return count + day.exercises.filter(function (exercise) {
+        return CARDIO_ACTIVITIES.some(function (activity) { return exercise.name === activity.name; });
+      }).length;
+    }, 0);
+    document.getElementById("dashboard-cardio").textContent = String(cardioCount);
+
+    const chart = document.getElementById("dashboard-chart");
+    chart.replaceChildren();
+    const labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+    labels.forEach(function (label, index) {
+      const day = schedule[index];
+      const active = day ? (day.completed ? 100 : day.exercises.length ? 55 : 12) : 12;
+      const bar = node("div", "chart-column");
+      const fill = node("div", "chart-bar");
+      fill.style.height = active + "%";
+      bar.append(fill, node("span", "", label));
+      chart.append(bar);
+    });
+    document.getElementById("dashboard-streak").textContent = completed + (completed === 1 ? " day streak" : " day streak");
+  }
+
+  function renderNutrition() {
+    const targetsEl = document.getElementById("nutrition-targets");
+    const mealsEl = document.getElementById("daily-meals");
+    if (!targetsEl || !mealsEl) return;
+    const targets = nutritionTargets();
+    targetsEl.replaceChildren();
+    [
+      ["ESTIMATED CALORIES", targets.calories + " kcal", "Illustrative only"],
+      ["EST. PROTEIN", "~" + targets.protein + " g", "Sample value"],
+      ["EST. CARBOHYDRATES", "~" + targets.carbs + " g", "Sample value"],
+      ["EST. FATS", "~" + targets.fat + " g", "Sample value"]
+    ].forEach(function (metric) {
+      const card = node("article", "nutrition-target");
+      card.append(node("span", "eyebrow", metric[0]), node("strong", "", metric[1]), node("span", "target-note", metric[2]));
+      targetsEl.append(card);
+    });
+
+    const meals = state.nutritionMeals || buildDailyMeals();
+    state.nutritionMeals = meals;
+    mealsEl.replaceChildren();
+    meals.forEach(function (meal, index) {
+      const card = node("article", "daily-meal");
+      const photo = foodImage(mealPhotoKind(meal), "Photograph of " + meal.title, "daily-meal-photo");
+      card.append(photo, node("span", "eyebrow", meal.type), node("h3", "", meal.title), node("p", "meal-portion", meal.portion));
+      card.append(node("p", "meal-macro", "~" + meal.calories + " kcal · ~" + meal.protein + "g protein · ~" + meal.carbs + "g carbs · ~" + meal.fat + "g fat"));
+      const replace = node("button", "meal-replace", "Replace with a similar food");
+      replace.type = "button";
+      replace.addEventListener("click", function () {
+        const alternatives = meals[index].alternatives;
+        const currentAlternative = meals[index].selectedAlternative || 0;
+        const alternative = alternatives[currentAlternative % alternatives.length];
+        meals[index] = { ...meals[index], title: alternative, selectedAlternative: currentAlternative + 1 };
+        state.nutritionMeals = meals;
+        saveState();
+        renderNutrition();
+        renderDashboard();
+      });
+      card.append(replace);
+      mealsEl.append(card);
+    });
+  }
+
+  function renderFoodLibrary(query) {
+    const results = document.getElementById("food-results");
+    if (!results) return;
+    results.replaceChildren();
+    const term = (query || "").toLowerCase();
+    FOODS.filter(function (food) { return !term || food.name.toLowerCase().includes(term); }).forEach(function (food) {
+      const card = node("article", "food-card");
+      card.append(
+        foodImage(foodArtType(food.name), "Photograph of " + food.name, "food-card-image"),
+        node("h3", "", food.name),
+        node("p", "food-portion", food.portion),
+        node("p", "food-macros", "Approx. " + food.calories + " kcal · " + food.protein + "g protein · " + food.carbs + "g carbs · " + food.fat + "g fat · " + food.fibre + "g fibre"),
+        node("p", "food-nutrients", "Vitamins: " + food.vitamins + " · Minerals: " + food.minerals),
+        node("p", "food-benefits", food.benefits),
+        node("p", "food-alternatives", "Similar alternatives: " + food.alternatives.join(", "))
+      );
+      results.append(card);
+    });
+  }
+
+  function renderFoodCompare() {
+    const container = document.getElementById("food-compare");
+    if (!container) return;
+    container.replaceChildren();
+    const first = FOODS.find(function (food) { return food.name === document.getElementById("food-compare-a").value; }) || FOODS[0];
+    const second = FOODS.find(function (food) { return food.name === document.getElementById("food-compare-b").value; }) || FOODS[1];
+    [first, second].forEach(function (food) {
+      const card = node("article", "compare-card");
+      card.append(foodImage(foodArtType(food.name), "Photograph of " + food.name, "compare-image"), node("h3", "", food.name), node("strong", "compare-calories", "Approx. " + food.calories + " kcal"), node("span", "", food.portion));
+      ["protein", "carbs", "fat", "fibre"].forEach(function (key) {
+        card.append(node("p", "compare-row", key + ": " + food[key] + " g"));
+      });
+      container.append(card);
+    });
+  }
+
+  function initializeFoodLibrary() {
+    const search = document.getElementById("food-search");
+    const selectA = document.getElementById("food-compare-a");
+    const selectB = document.getElementById("food-compare-b");
+    if (!search || !selectA || !selectB) return;
+    FOODS.forEach(function (food) {
+      selectA.append(new Option(food.name, food.name));
+      selectB.append(new Option(food.name, food.name));
+    });
+    selectA.value = "Rolled oats";
+    selectB.value = "Eggs";
+    search.addEventListener("input", function () { renderFoodLibrary(search.value); });
+    selectA.addEventListener("change", renderFoodCompare);
+    selectB.addEventListener("change", renderFoodCompare);
+    renderFoodLibrary();
+    renderFoodCompare();
+  }
+
   function renderMeals() {
-    const meals = MEALS[document.getElementById("meal-day").value] || MEALS.day;
+    const mealDay = document.getElementById("meal-day");
+    if (state.profile && ["Vegetarian", "Vegan", "Plant-forward"].includes(state.profile.diet)) mealDay.value = "plant";
+    const meals = MEALS[mealDay.value] || MEALS.day;
     const grid = document.getElementById("meal-grid");
     grid.replaceChildren();
     meals.forEach(function (meal) {
       const card = node("article", "meal-card");
       const art = node("div", "meal-visual meal-" + meal.color);
-      const icon = node("span", "meal-art-icon", meal.icon);
-      icon.setAttribute("aria-hidden", "true");
-      art.append(icon, node("span", "eyebrow", meal.type));
+      const artType = meal.type === "BREAKFAST" ? "breakfast" : meal.type === "LUNCH" ? "lunch" : meal.type === "DINNER" ? "dinner" : "snack";
+      const photo = foodImage(artType, "Photograph of " + meal.title, "meal-photo");
+      art.append(photo, node("span", "eyebrow", meal.type));
       const content = node("div", "meal-content");
       content.append(node("h3", "", meal.title), node("p", "", meal.description));
       const alternatives = node("details", "alternative-details");
@@ -241,10 +734,11 @@
   function renderProgress() {
     const summary = document.getElementById("progress-summary");
     summary.replaceChildren();
+    const completedDays = (state.schedule || []).filter(function (day) { return day.completed; });
     [
-      { icon: "↗", label: "MOVEMENT IDEAS", value: String(state.completed.length), note: state.completed.length === 1 ? "one small win" : "at your own pace" },
-      { icon: "≈", label: "GLASSES OF WATER", value: String(state.water), note: "listen to your body" },
-      { icon: "♡", label: "CHECK-INS", value: String(state.history.length), note: "moments worth remembering" }
+      { icon: "↗", label: "PLANNED DAYS", value: String((state.schedule || []).length), note: "in this demo plan" },
+      { icon: "✓", label: "COMPLETED WORKOUTS", value: String(completedDays.length + state.completed.length), note: "this browser session" },
+      { icon: "♡", label: "FITNESS FOCUS", value: state.profile ? state.profile.goal : "—", note: "demo preference" }
     ].forEach(function (metric) {
       const item = node("article", "summary-card");
       const icon = node("span", "summary-icon", metric.icon);
@@ -252,57 +746,111 @@
       item.append(icon, node("span", "eyebrow", metric.label), node("strong", "summary-value", metric.value), node("span", "summary-note", metric.note));
       summary.append(item);
     });
-    document.getElementById("log-count").textContent = state.history.length + (state.history.length === 1 ? " MOMENT LOGGED" : " MOMENTS LOGGED");
+    document.getElementById("log-count").textContent = completedDays.length + (completedDays.length === 1 ? " DAY COMPLETE" : " DAYS COMPLETE");
     const history = document.getElementById("progress-history");
     history.replaceChildren();
-    if (!state.history.length) {
+    if (!completedDays.length) {
       const empty = node("div", "history-empty");
       const icon = node("span", "empty-icon", "✳");
       icon.setAttribute("aria-hidden", "true");
       empty.append(
         icon,
-        node("strong", "", "Your story starts whenever you’re ready."),
-        node("p", "", "Log a movement session, a nourishing meal, a rest day, or any moment you want to remember.")
+        node("strong", "", "No completed workout days yet."),
+        node("p", "", "Mark a day complete in your weekly plan. Progress is kept in memory only and resets when you refresh.")
       );
       history.append(empty);
       return;
     }
-    state.history.forEach(function (entry) {
+    completedDays.forEach(function (entry) {
       const row = node("article", "history-entry");
       const icon = node("span", "history-icon", "✳");
       icon.setAttribute("aria-hidden", "true");
       const content = node("div", "history-content");
-      content.append(node("strong", "", entry.activity));
-      if (entry.note) content.append(node("p", "", entry.note));
-      const time = node("time", "history-date", readableDate(entry.date));
-      time.dateTime = entry.date;
-      row.append(icon, content, time);
+      content.append(node("strong", "", entry.day + " · " + entry.muscleGroups));
+      row.append(icon, content);
       history.append(row);
     });
   }
 
-  document.getElementById("progress-form").addEventListener("submit", function (event) {
-    event.preventDefault();
-    state.history.unshift({
-      date: dayFor(new Date()),
-      activity: document.getElementById("log-activity").value,
-      note: document.getElementById("log-note").value.trim()
-    });
-    state.history = state.history.slice(0, 30);
-    saveState();
-    document.getElementById("log-note").value = "";
-    renderProgress();
-    document.getElementById("progress-history").setAttribute("tabindex", "-1");
-    document.getElementById("progress-history").focus();
-  });
-
   document.getElementById("clear-progress").addEventListener("click", function () {
-    if (!state.history.length) return;
-    state.history = [];
-    saveState();
+    state.completed = [];
+    (state.schedule || []).forEach(function (day) { day.completed = false; });
+    renderSchedule();
+    renderDashboard();
     renderProgress();
   });
 
+  const premiumToggle = document.getElementById("premium-toggle");
+  const premiumDetails = document.getElementById("premium-details");
+  premiumToggle.addEventListener("click", function () {
+    state.premium = !state.premium;
+    saveState();
+    premiumDetails.hidden = !state.premium;
+    premiumToggle.textContent = state.premium ? "Premium preview enabled ✓" : "Preview premium $8/month";
+  });
+  premiumDetails.hidden = !state.premium;
+  premiumToggle.textContent = state.premium ? "Premium preview enabled ✓" : "Preview premium $8/month";
+
+  document.getElementById("dashboard-edit").addEventListener("click", function () {
+    location.hash = "#home";
+  });
+
+  document.getElementById("fitness-form").addEventListener("submit", function (event) {
+    event.preventDefault();
+    const days = selectedValues("days");
+    if (!days.length) {
+      document.getElementById("profile-days").classList.add("choice-row-error");
+      return;
+    }
+    document.getElementById("profile-days").classList.remove("choice-row-error");
+    const profile = {
+      goal: document.getElementById("profile-goal").value,
+      experience: document.getElementById("profile-experience").value,
+      activity: document.getElementById("profile-activity").value,
+      time: document.getElementById("profile-time").value,
+      diet: document.getElementById("profile-diet").value,
+      days: days,
+      equipment: selectedValues("equipment")
+    };
+    state.profile = profile;
+    state.schedule = buildSchedule(profile);
+    state.completed = [];
+    saveState();
+    loadProfileForm();
+    renderSchedule();
+    state.nutritionMeals = null;
+    renderNutrition();
+    renderMeals();
+    renderCardioPlanner();
+    renderWorkoutNutrition();
+    renderDashboard();
+    location.hash = "#workouts";
+  });
+
+  document.getElementById("edit-plan").addEventListener("click", function () {
+    location.hash = "#home";
+    document.getElementById("fitness-plan-heading").scrollIntoView({ behavior: "smooth" });
+  });
+
+  const nutritionPhase = document.getElementById("nutrition-phase");
+  nutritionPhase.value = state.nutritionPhase;
+  nutritionPhase.addEventListener("change", function () {
+    state.nutritionPhase = nutritionPhase.value;
+    state.nutritionMeals = null;
+    saveState();
+    renderNutrition();
+    renderDashboard();
+  });
+
+  if (state.profile) state.schedule = buildSchedule(state.profile);
+  loadProfileForm();
+  renderSchedule();
+  renderCardioPlanner();
+  initializeMuscleExplorer();
+  renderWorkoutNutrition();
+  initializeFoodLibrary();
+  renderNutrition();
+  renderDashboard();
   renderGoals();
   renderProgress();
   showStorageNotice();
