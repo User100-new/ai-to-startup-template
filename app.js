@@ -4,10 +4,16 @@
 
   const STORE_KEY = "health-blueprint";
   const EQUIPMENT_OPTIONS = ["None", "Dumbbells", "Barbell", "Squat rack", "Kettlebell", "Resistance bands", "Bench", "Cable machine", "Weight machines", "Pull-up bar"];
-  const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionMeals: null, premium: false };
+  const GOAL_MEALS_BY_ID = new Map(GOAL_MEALS.map(function (meal) { return [meal.id, meal]; }));
+  const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionMeals: null, mealFavorites: [], plannedMeals: [], premium: false };
   let state = emptyState;
   let storageAvailable = true;
   const notice = document.getElementById("storage-notice");
+
+  function localDateKey() {
+    const date = new Date();
+    return date.getFullYear() + "-" + String(date.getMonth() + 1).padStart(2, "0") + "-" + String(date.getDate()).padStart(2, "0");
+  }
 
   function normalizeEquipment(items) {
     const selected = Array.isArray(items)
@@ -22,6 +28,16 @@
       const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
       if (!saved || typeof saved !== "object") return emptyState;
       const preferences = saved.preferences && typeof saved.preferences === "object" ? saved.preferences : saved.profile || {};
+      const mealFavorites = Array.isArray(preferences.mealFavorites)
+        ? Array.from(new Set(preferences.mealFavorites.filter(function (id) { return GOAL_MEALS_BY_ID.has(id); })))
+        : [];
+      const plannedMeals = preferences.plannerDate === localDateKey() && Array.isArray(preferences.plannedMeals)
+        ? preferences.plannedMeals.filter(function (item) {
+          return item && GOAL_MEALS_BY_ID.has(item.id) && Number.isFinite(Number(item.servings)) && Number(item.servings) > 0;
+        }).map(function (item) {
+          return { id: item.id, servings: Math.min(10, Math.max(0.25, Number(item.servings))) };
+        })
+        : [];
       return {
         goal: typeof preferences.goal === "string" ? preferences.goal : "",
         completed: [],
@@ -37,6 +53,8 @@
         schedule: null,
         nutritionPhase: ["maintain", "cut", "bulk"].includes(preferences.nutritionPhase) ? preferences.nutritionPhase : "maintain",
         nutritionMeals: null,
+        mealFavorites: mealFavorites,
+        plannedMeals: plannedMeals,
         premium: preferences.premiumPreview === true || saved.premium === true
       };
     } catch (error) {
@@ -48,10 +66,13 @@
   function saveState() {
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({
-        version: 2,
+        version: 3,
         preferences: Object.assign({
           nutritionPhase: state.nutritionPhase,
-          premiumPreview: state.premium
+          premiumPreview: state.premium,
+          mealFavorites: state.mealFavorites,
+          plannedMeals: state.plannedMeals,
+          plannerDate: localDateKey()
         }, state.profile ? {
           goal: state.profile.goal,
           experience: state.profile.experience,
@@ -462,13 +483,10 @@
   ];
 
   const FOOD_PHOTOS = {
-    breakfast: "assets/foods/oatmeal-bowl.jpg",
-    lunch: "assets/foods/grain-and-vegetable-bowl.jpg",
-    dinner: "assets/foods/chicken-and-vegetables.jpg",
-    snack: "assets/foods/peanut-butter-banana-toast.jpg",
     oats: "assets/foods/oatmeal-bowl.jpg",
     egg: "assets/foods/eggs-on-toast.jpg",
     grain: "assets/foods/grain-and-vegetable-bowl.jpg",
+    brownRice: "assets/foods/brown-rice-bowl.svg",
     beans: "assets/foods/vegetable-and-bean-salad.jpg",
     lentils: "assets/foods/lentils.jpg",
     blackBeans: "assets/foods/black-beans.jpg",
@@ -480,7 +498,37 @@
     plantLunch: "assets/foods/vegetable-and-bean-salad.jpg",
     plantDinner: "assets/foods/grain-and-vegetable-bowl.jpg",
     chickenLunch: "assets/foods/chicken-and-vegetables.jpg",
-    chickenDinner: "assets/foods/chicken-and-vegetables.jpg"
+    chickenDinner: "assets/foods/chicken-and-vegetables.jpg",
+    wrap: "assets/foods/vegetable-wrap.svg",
+    pasta: "assets/foods/tomato-pasta.svg",
+    tofu: "assets/foods/tofu-stir-fry.svg",
+    hummus: "assets/foods/hummus-and-vegetables.svg",
+    peanutOats: "assets/foods/peanut-butter-banana-oats.svg",
+    bananaPeanutButter: "assets/foods/banana-peanut-butter.svg"
+  };
+  const FOOD_PHOTO_ALTS = {
+    oats: "Bowl of oatmeal topped with berries.",
+    egg: "Fried egg on toast.",
+    grain: "Bowl of grains and mixed vegetables.",
+    brownRice: "Illustration of a bowl of brown rice.",
+    beans: "Chickpea and vegetable salad bowl.",
+    lentils: "Cooked lentils topped with caramelized onions.",
+    blackBeans: "Close-up photograph of black beans.",
+    protein: "Grilled chicken served with vegetables.",
+    dairy: "Yogurt cups topped with berries.",
+    spread: "Toast topped with peanut butter and banana.",
+    greens: "Fresh mixed vegetables.",
+    fruit: "A bunch of bananas.",
+    plantLunch: "Chickpea and vegetable salad bowl.",
+    plantDinner: "Grain and vegetable bowl.",
+    chickenLunch: "Chicken and vegetables on a plate.",
+    chickenDinner: "Chicken and vegetables on a plate.",
+    wrap: "Illustration of a whole-grain wrap filled with vegetables.",
+    pasta: "Illustration of pasta with tomato sauce.",
+    tofu: "Illustration of tofu stir-fried with vegetables.",
+    hummus: "Illustration of hummus served with vegetable sticks.",
+    peanutOats: "Illustration of oatmeal topped with banana and peanut butter.",
+    bananaPeanutButter: "Illustration of banana with peanut butter."
   };
 
   function foodImage(kind, alt, className) {
@@ -494,7 +542,7 @@
   function foodArtType(foodName) {
     if (foodName === "Rolled oats") return "oats";
     if (foodName === "Eggs") return "egg";
-    if (foodName === "Brown rice") return "grain";
+    if (foodName === "Brown rice") return "brownRice";
     if (foodName === "Lentils") return "lentils";
     if (foodName === "Black beans") return "blackBeans";
     if (foodName === "Chicken breast") return "protein";
@@ -520,25 +568,132 @@
     const plantBased = state.profile && ["Vegetarian", "Vegan", "Plant-forward"].includes(state.profile.diet);
     const proteinFood = plantBased ? "lentils" : "chicken";
     return [
-      { type: "Breakfast", title: state.profile && state.profile.diet === "Vegan" ? "Oats, soy drink & banana" : "Oats, yogurt & banana", portion: state.profile && state.profile.diet === "Vegan" ? "1 bowl + 1 cup soy drink" : "1 bowl + 170 g yogurt", calories: Math.round(targets.calories * .25), protein: Math.round(targets.protein * .23), carbs: Math.round(targets.carbs * .25), fat: Math.round(targets.fat * .22), foodKey: "breakfast", alternatives: state.profile && state.profile.diet === "Vegan" ? ["Oats + soy yogurt", "Tofu scramble + toast"] : ["Oats + eggs", "Greek yogurt + oats"] },
-      { type: "Lunch", title: proteinFood === "lentils" ? "Chickpea & vegetable bowl" : "Chicken & vegetable bowl", portion: "1 large bowl", calories: Math.round(targets.calories * .30), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .30), fat: Math.round(targets.fat * .27), foodKey: plantBased ? "plantLunch" : "chickenLunch", alternatives: plantBased ? ["Beans + rice", "Tofu + whole-wheat pasta"] : ["Beans + rice", "Whole-wheat pasta + chicken"] },
-      { type: "Dinner", title: proteinFood === "lentils" ? "Grain & vegetable bowl" : "Chicken & vegetables", portion: "1 plate", calories: Math.round(targets.calories * .32), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .32), fat: Math.round(targets.fat * .32), foodKey: plantBased ? "plantDinner" : "chickenDinner", alternatives: ["Tofu stir-fry", "Lentil pasta + vegetables"] },
-      { type: "Snack", title: "Banana & peanut butter", portion: "1 banana + 1 tbsp", calories: Math.round(targets.calories * .13), protein: Math.round(targets.protein * .13), carbs: Math.round(targets.carbs * .13), fat: Math.round(targets.fat * .19), foodKey: "snack", alternatives: plantBased ? ["Soy yogurt + fruit", "Hummus + toast"] : ["Greek yogurt + fruit", "Boiled eggs + fruit"] }
+      { type: "Breakfast", title: "Berry & oat bowl", portion: state.profile && state.profile.diet === "Vegan" ? "1 bowl + 1 cup soy drink" : "1 bowl + 170 g yogurt", calories: Math.round(targets.calories * .25), protein: Math.round(targets.protein * .23), carbs: Math.round(targets.carbs * .25), fat: Math.round(targets.fat * .22), photo: "oats", alternatives: state.profile && state.profile.diet === "Vegan" ? ["Oats + soy yogurt", "Tofu scramble + toast"] : ["Oats + eggs", "Greek yogurt + oats"] },
+      { type: "Lunch", title: proteinFood === "lentils" ? "Chickpea & vegetable bowl" : "Chicken & vegetable bowl", portion: "1 large bowl", calories: Math.round(targets.calories * .30), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .30), fat: Math.round(targets.fat * .27), photo: plantBased ? "plantLunch" : "chickenLunch", alternatives: plantBased ? ["Beans + rice", "Tofu + whole-wheat pasta"] : ["Beans + rice", "Whole-wheat pasta + chicken"] },
+      { type: "Dinner", title: proteinFood === "lentils" ? "Grain & vegetable bowl" : "Chicken & vegetables", portion: "1 plate", calories: Math.round(targets.calories * .32), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .32), fat: Math.round(targets.fat * .32), photo: plantBased ? "plantDinner" : "chickenDinner", alternatives: ["Tofu stir-fry", "Lentil pasta + vegetables"] },
+      { type: "Snack", title: "Banana & peanut butter", portion: "1 banana + 1 tbsp", calories: Math.round(targets.calories * .13), protein: Math.round(targets.protein * .13), carbs: Math.round(targets.carbs * .13), fat: Math.round(targets.fat * .19), photo: "bananaPeanutButter", alternatives: plantBased ? ["Soy yogurt + fruit", "Hummus + toast"] : ["Greek yogurt + fruit", "Boiled eggs + fruit"] }
     ];
   }
 
   function mealPhotoKind(meal) {
+    if (meal.photo) return meal.photo;
     const title = meal.title.toLowerCase();
-    if (title.includes("oat")) return "breakfast";
+    if (title.includes("wrap")) return "wrap";
+    if (title.includes("pasta")) return "pasta";
+    if (title.includes("tofu")) return "tofu";
+    if (title.includes("hummus")) return "hummus";
+    if (title.includes("peanut") && title.includes("oat")) return "peanutOats";
+    if (title.includes("peanut") && title.includes("banana")) return "bananaPeanutButter";
+    if (title.includes("oat")) return "oats";
     if (title.includes("egg")) return "egg";
     if (title.includes("yogurt")) return "dairy";
-    if (title.includes("peanut") || title.includes("banana")) return "snack";
+    if (title.includes("peanut")) return "spread";
+    if (title.includes("banana")) return "fruit";
     if (title.includes("lentil")) return "lentils";
     if (title.includes("bean") || title.includes("chickpea") || title.includes("hummus")) return "beans";
     if (title.includes("chicken")) return "protein";
-    if (title.includes("tofu")) return "plantDinner";
-    if (title.includes("grain") || title.includes("vegetable") || title.includes("rice")) return "lunch";
-    return meal.foodKey;
+    if (title.includes("rice")) return "brownRice";
+    if (title.includes("grain") || title.includes("vegetable")) return "grain";
+    return meal.photo || meal.foodKey || "grain";
+  }
+
+  function foodPhotoAlt(kind) {
+    return FOOD_PHOTO_ALTS[kind] || "Food photograph.";
+  }
+
+  function calculateMealNutrition(meal, servings) {
+    const total = { calories: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 };
+    meal.ingredients.forEach(function (item) {
+      const ingredient = NUTRITION_INGREDIENTS[item[0]];
+      const amount = item[1] * servings / 100;
+      total.calories += ingredient.values[0] * amount;
+      total.protein += ingredient.values[1] * amount;
+      total.carbs += ingredient.values[2] * amount;
+      total.fat += ingredient.values[3] * amount;
+      total.fibre += ingredient.values[4] * amount;
+    });
+    return total;
+  }
+
+  function mealMicronutrients(meal, field) {
+    const values = new Set();
+    meal.ingredients.forEach(function (item) {
+      (NUTRITION_INGREDIENTS[item[0]][field] || []).forEach(function (value) { values.add(value); });
+    });
+    return Array.from(values).slice(0, 7).join(", ") || "Not a significant source in the listed ingredients";
+  }
+
+  function mealAllergenInfo(meal) {
+    const contains = new Set();
+    const mayContain = new Set();
+    meal.ingredients.forEach(function (item) {
+      const ingredient = NUTRITION_INGREDIENTS[item[0]];
+      (ingredient.allergens || []).forEach(function (allergen) { contains.add(allergen); });
+      (ingredient.mayContain || []).forEach(function (allergen) { mayContain.add(allergen); });
+    });
+    return {
+      contains: contains.size ? "Contains: " + Array.from(contains).join(", ") : "No major allergens are listed for these generic ingredients.",
+      mayContain: mayContain.size ? " " + Array.from(mayContain).join("; ") : ""
+    };
+  }
+
+  function mealMatchesDiet(meal, filter) {
+    if (filter === "all") return true;
+    const ingredients = meal.ingredients.map(function (item) { return NUTRITION_INGREDIENTS[item[0]]; });
+    if (filter === "vegan") return ingredients.every(function (ingredient) { return !ingredient.animal; });
+    if (filter === "vegetarian") return ingredients.every(function (ingredient) { return !["meat", "fish"].includes(ingredient.animal); });
+    if (filter === "pescatarian") return ingredients.every(function (ingredient) { return ingredient.animal !== "meat"; });
+    if (filter === "gluten-free") return ingredients.every(function (ingredient) {
+      return ingredient.gluten !== true && !(ingredient.mayContain || []).some(function (warning) { return /wheat/i.test(warning); });
+    });
+    if (filter === "dairy-free") return ingredients.every(function (ingredient) { return ingredient.animal !== "dairy" && !(ingredient.allergens || []).includes("Milk"); });
+    return true;
+  }
+
+  function escapeXml(value) {
+    return String(value).replace(/[&<>"']/g, function (character) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[character];
+    });
+  }
+
+  function ingredientIllustration(ingredient, x, y, angle, scale) {
+    const color = ingredient.color || "#c9ab7a";
+    let shape;
+    if (ingredient.art === "berry") shape = `<circle cx="-7" cy="-2" r="7" fill="${color}"/><circle cx="5" cy="-5" r="7" fill="${color}"/><circle cx="1" cy="7" r="7" fill="${color}"/><path d="M-2-10l4 4 5-5" fill="#668b58"/>`;
+    else if (ingredient.art === "leaf") shape = `<path d="M-15 3Q-7-13 0-3Q7-14 15 0Q7 12 0 5Q-8 13-15 3Z" fill="${color}"/><path d="M-12 3L12 0M0 5L0-4" stroke="#d1dfbd" stroke-width="1.5"/>`;
+    else if (ingredient.art === "egg") shape = `<ellipse cx="0" cy="0" rx="14" ry="10" fill="#f3eddf"/><circle cx="2" cy="0" r="5.5" fill="${color}"/>`;
+    else if (ingredient.art === "grain") shape = `<ellipse cx="-8" cy="0" rx="7" ry="3" transform="rotate(-25 -8 0)" fill="${color}"/><ellipse cx="3" cy="-5" rx="7" ry="3" transform="rotate(18 3 -5)" fill="${color}"/><ellipse cx="8" cy="6" rx="7" ry="3" transform="rotate(-15 8 6)" fill="${color}"/><circle cx="-1" cy="6" r="2" fill="#eee0bf"/>`;
+    else if (ingredient.art === "protein") shape = `<path d="M-14-5Q-10-12 2-10L13-5Q17 0 11 8L-5 10Q-16 7-14-5Z" fill="${color}"/><path d="M-7-4Q0 0 7 4M-4-7Q2-3 9 0" fill="none" stroke="#ecc7a2" stroke-width="2"/>`;
+    else if (ingredient.art === "fish") shape = `<path d="M-15 0Q-5-12 8-5L15-10L13 0L15 10L8 5Q-5 12-15 0Z" fill="${color}"/><circle cx="5" cy="-1" r="1.5" fill="#263345"/>`;
+    else if (ingredient.art === "seafood") shape = `<path d="M-12 7Q-16-3-7-9Q3-14 12-7Q16 0 9 8Q1 13-7 7M-10-5L-15-11M-8 8L-13 13" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>`;
+    else if (ingredient.art === "dairy") shape = `<path d="M-12 7Q-16 2-10-2Q-8-12 1-8Q8-13 11-5Q18 1 11 7Q6 13-2 9Q-8 13-12 7Z" fill="${color}"/><path d="M-7 2Q0-3 7 2" fill="none" stroke="#cfbfa5" stroke-width="2"/>`;
+    else if (ingredient.art === "bread") shape = `<rect x="-13" y="-10" width="26" height="20" rx="7" fill="${color}"/><rect x="-9" y="-6" width="18" height="12" rx="4" fill="#e8c994"/>`;
+    else if (ingredient.art === "avocado") shape = `<ellipse cx="0" cy="0" rx="13" ry="10" transform="rotate(-25)" fill="#476c43"/><ellipse cx="0" cy="0" rx="9" ry="7" transform="rotate(-25)" fill="${color}"/><circle cx="1" cy="1" r="3" fill="#795332"/>`;
+    else if (ingredient.art === "beans") shape = `<ellipse cx="-7" cy="0" rx="8" ry="5" transform="rotate(25 -7 0)" fill="${color}"/><ellipse cx="6" cy="-4" rx="8" ry="5" transform="rotate(-20 6 -4)" fill="${color}"/><ellipse cx="5" cy="7" rx="8" ry="5" transform="rotate(15 5 7)" fill="${color}"/>`;
+    else if (ingredient.art === "nut") shape = `<ellipse cx="-7" cy="1" rx="6" ry="10" transform="rotate(-28 -7 1)" fill="${color}"/><ellipse cx="7" cy="-1" rx="6" ry="10" transform="rotate(28 7 -1)" fill="${color}"/><path d="M-9 1Q-7-2-5-3M5-1Q7-4 9-5" stroke="#edcf9f" stroke-width="1.5"/>`;
+    else if (ingredient.art === "citrus") shape = `<circle cx="0" cy="0" r="11" fill="${color}"/><path d="M0-10V10M-9-5L9 5M-9 5L9-5" stroke="#f8dda0" stroke-width="1.5"/>`;
+    else if (ingredient.art === "oil") shape = `<path d="M0-12Q-10 1-8 7Q-6 13 0 12Q7 11 8 5Q8 0 0-12Z" fill="${color}"/>`;
+    else if (ingredient.art === "chocolate") shape = `<rect x="-11" y="-9" width="22" height="18" rx="2" fill="${color}"/><path d="M0-9V9M-11 0H11" stroke="#a57a61" stroke-width="1.5"/>`;
+    else if (ingredient.art === "spice") shape = `<circle cx="-8" cy="-3" r="2.5" fill="${color}"/><circle cx="1" cy="-7" r="2" fill="${color}"/><circle cx="8" cy="1" r="3" fill="${color}"/><circle cx="-2" cy="6" r="2.5" fill="${color}"/>`;
+    else shape = `<circle cx="-7" cy="-2" r="7" fill="${color}"/><circle cx="5" cy="-4" r="7" fill="${color}"/><rect x="-4" y="3" width="11" height="9" rx="3" fill="${color}"/>`;
+    return `<g transform="translate(${x} ${y}) rotate(${angle}) scale(${scale})">${shape}</g>`;
+  }
+
+  function recipeImage(meal) {
+    const hash = meal.id.split("").reduce(function (total, character) { return (total * 31 + character.charCodeAt(0)) >>> 0; }, 7);
+    const positions = [[126, 62], [163, 57], [198, 66], [135, 101], [177, 104], [207, 99]];
+    const art = meal.ingredients.slice(0, positions.length).map(function (item, index) {
+      const ingredient = NUTRITION_INGREDIENTS[item[0]];
+      const position = positions[(index + hash % positions.length) % positions.length];
+      return ingredientIllustration(ingredient, position[0], position[1], (hash + index * 47) % 35 - 17, 0.9 + (index % 2) * 0.12);
+    }).join("");
+    const tint = ["#29415b", "#29483f", "#594232"][hash % 3];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><defs><linearGradient id="backdrop" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${tint}"/><stop offset="1" stop-color="#131d2b"/></linearGradient><filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#080e17" flood-opacity=".5"/></filter></defs><rect width="320" height="180" fill="url(#backdrop)"/><circle cx="160" cy="81" r="68" fill="#c6d0cc" filter="url(#shadow)"/><circle cx="160" cy="81" r="58" fill="#f0eadc"/><circle cx="160" cy="81" r="48" fill="#e3dfd1"/>${art}<path d="M0 145H320V180H0Z" fill="#111a27" fill-opacity=".92"/><text x="160" y="167" text-anchor="middle" fill="#eef2f6" font-family="Arial,sans-serif" font-size="12" font-weight="600">${escapeXml(meal.title)}</text></svg>`;
+    const image = node("img", "recipe-image");
+    image.src = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+    image.alt = "Illustration of " + meal.title + " with " + meal.ingredients.map(function (item) { return NUTRITION_INGREDIENTS[item[0]].name; }).join(", ") + ".";
+    image.loading = "lazy";
+    return image;
   }
 
   function renderDashboard() {
@@ -632,7 +787,8 @@
     mealsEl.replaceChildren();
     meals.forEach(function (meal, index) {
       const card = node("article", "daily-meal");
-      const photo = foodImage(mealPhotoKind(meal), "Photograph of " + meal.title, "daily-meal-photo");
+      const photoKind = mealPhotoKind(meal);
+      const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind), "daily-meal-photo");
       card.append(photo, node("span", "eyebrow", meal.type), node("h3", "", meal.title), node("p", "meal-portion", meal.portion));
       card.append(node("p", "meal-macro", "~" + meal.calories + " kcal · ~" + meal.protein + "g protein · ~" + meal.carbs + "g carbs · ~" + meal.fat + "g fat"));
       const replace = node("button", "meal-replace", "Replace with a similar food");
@@ -641,7 +797,8 @@
         const alternatives = meals[index].alternatives;
         const currentAlternative = meals[index].selectedAlternative || 0;
         const alternative = alternatives[currentAlternative % alternatives.length];
-        meals[index] = { ...meals[index], title: alternative, selectedAlternative: currentAlternative + 1 };
+        const alternativePhoto = mealPhotoKind({ title: alternative });
+        meals[index] = { ...meals[index], title: alternative, photo: alternativePhoto, photoAlt: foodPhotoAlt(alternativePhoto), selectedAlternative: currentAlternative + 1 };
         state.nutritionMeals = meals;
         saveState();
         renderNutrition();
@@ -660,7 +817,7 @@
     FOODS.filter(function (food) { return !term || food.name.toLowerCase().includes(term); }).forEach(function (food) {
       const card = node("article", "food-card");
       card.append(
-        foodImage(foodArtType(food.name), "Photograph of " + food.name, "food-card-image"),
+        foodImage(foodArtType(food.name), foodPhotoAlt(foodArtType(food.name)), "food-card-image"),
         node("h3", "", food.name),
         node("p", "food-portion", food.portion),
         node("p", "food-macros", "Approx. " + food.calories + " kcal · " + food.protein + "g protein · " + food.carbs + "g carbs · " + food.fat + "g fat · " + food.fibre + "g fibre"),
@@ -680,7 +837,7 @@
     const second = FOODS.find(function (food) { return food.name === document.getElementById("food-compare-b").value; }) || FOODS[1];
     [first, second].forEach(function (food) {
       const card = node("article", "compare-card");
-      card.append(foodImage(foodArtType(food.name), "Photograph of " + food.name, "compare-image"), node("h3", "", food.name), node("strong", "compare-calories", "Approx. " + food.calories + " kcal"), node("span", "", food.portion));
+      card.append(foodImage(foodArtType(food.name), foodPhotoAlt(foodArtType(food.name)), "compare-image"), node("h3", "", food.name), node("strong", "compare-calories", "Approx. " + food.calories + " kcal"), node("span", "", food.portion));
       ["protein", "carbs", "fat", "fibre"].forEach(function (key) {
         card.append(node("p", "compare-row", key + ": " + food[key] + " g"));
       });
@@ -706,17 +863,291 @@
     renderFoodCompare();
   }
 
+  function formatAmount(value) {
+    return String(Math.round(value * 10) / 10).replace(/\.0$/, "");
+  }
+
+  function recipeIngredientsList(meal, servings) {
+    const list = node("ul", "recipe-ingredients-list");
+    meal.ingredients.forEach(function (item) {
+      const ingredient = NUTRITION_INGREDIENTS[item[0]];
+      list.append(node("li", "", formatAmount(item[1] * servings) + " g " + ingredient.name));
+    });
+    return list;
+  }
+
+  function updateRecipeCard(card, meal, servings) {
+    const nutrition = calculateMealNutrition(meal, servings);
+    card.querySelector("[data-recipe-servings]").textContent = formatAmount(servings) + " × " + meal.portion;
+    card.querySelector("[data-recipe-ingredients]").replaceChildren(recipeIngredientsList(meal, servings));
+    [
+      ["calories", Math.round(nutrition.calories) + " kcal"],
+      ["protein", formatAmount(nutrition.protein) + " g"],
+      ["carbs", formatAmount(nutrition.carbs) + " g"],
+      ["fat", formatAmount(nutrition.fat) + " g"],
+      ["fibre", formatAmount(nutrition.fibre) + " g"]
+    ].forEach(function (metric) {
+      card.querySelector('[data-recipe-value="' + metric[0] + '"]').textContent = metric[1];
+    });
+  }
+
+  function addRecipeToPlan(meal, servings) {
+    const existing = state.plannedMeals.find(function (item) { return item.id === meal.id; });
+    if (existing) existing.servings = Math.min(10, existing.servings + servings);
+    else state.plannedMeals.push({ id: meal.id, servings: Math.min(10, servings) });
+    saveState();
+    renderDailyMealPlan();
+  }
+
+  function summarizeMealPlan(plannedMeals) {
+    const totals = { calories: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 };
+    const groceries = new Map();
+    plannedMeals.forEach(function (planned) {
+      const meal = GOAL_MEALS_BY_ID.get(planned.id);
+      if (!meal) return;
+      const nutrition = calculateMealNutrition(meal, planned.servings);
+      Object.keys(totals).forEach(function (key) { totals[key] += nutrition[key]; });
+      meal.ingredients.forEach(function (item) {
+        groceries.set(item[0], (groceries.get(item[0]) || 0) + item[1] * planned.servings);
+      });
+    });
+    return {
+      totals: totals,
+      groceries: Array.from(groceries.entries()).sort(function (first, second) {
+        return NUTRITION_INGREDIENTS[first[0]].name.localeCompare(NUTRITION_INGREDIENTS[second[0]].name);
+      })
+    };
+  }
+
+  function createRecipeCard(meal) {
+    const card = node("article", "recipe-card");
+    card.append(recipeImage(meal));
+
+    const content = node("div", "recipe-card-content");
+    const heading = node("div", "recipe-card-heading");
+    heading.append(node("span", "eyebrow", meal.type), node("h3", "", meal.title));
+    content.append(heading);
+
+    const nutrition = node("div", "recipe-nutrition");
+    nutrition.setAttribute("aria-live", "polite");
+    [
+      ["calories", "Calories"],
+      ["protein", "Protein"],
+      ["carbs", "Carbs"],
+      ["fat", "Fat"],
+      ["fibre", "Fibre"]
+    ].forEach(function (metric) {
+      const item = node("div", "recipe-nutrition-item");
+      item.append(node("span", "", metric[1]), node("strong", "", ""));
+      item.querySelector("strong").dataset.recipeValue = metric[0];
+      nutrition.append(item);
+    });
+    content.append(nutrition);
+
+    const portion = node("label", "recipe-portion-control", "Adjust portion");
+    const portionInput = node("input", "recipe-portion-input");
+    portionInput.type = "range";
+    portionInput.min = "0.5";
+    portionInput.max = "2";
+    portionInput.step = "0.25";
+    portionInput.value = "1";
+    portionInput.setAttribute("aria-label", "Adjust portion size for " + meal.title);
+    const servingValue = node("output", "recipe-portion-value", "");
+    servingValue.dataset.recipeServings = "true";
+    portion.append(portionInput, servingValue);
+    content.append(portion);
+
+    const details = node("details", "recipe-details");
+    details.append(node("summary", "", "Ingredients, preparation & nutrition notes"));
+    const ingredientSection = node("div", "recipe-detail-section");
+    ingredientSection.append(node("h4", "", "Ingredients for this portion"));
+    const ingredientList = node("div", "recipe-ingredients-container");
+    ingredientList.dataset.recipeIngredients = "true";
+    ingredientSection.append(ingredientList);
+    details.append(ingredientSection);
+    [
+      ["Preparation", meal.preparation],
+      ["Health benefits", meal.benefits],
+      ["Vitamins", mealMicronutrients(meal, "vitamins")],
+      ["Minerals", mealMicronutrients(meal, "minerals")]
+    ].forEach(function (item) {
+      const section = node("div", "recipe-detail-section");
+      section.append(node("h4", "", item[0]), node("p", "", item[1]));
+      details.append(section);
+    });
+    const allergens = mealAllergenInfo(meal);
+    const allergenSection = node("div", "recipe-detail-section recipe-allergen-note");
+    allergenSection.append(node("h4", "", "Allergen information"), node("p", "", allergens.contains + (allergens.mayContain ? " May contain: " + allergens.mayContain.trim() + "." : "") + " Check product labels and cross-contact risks."));
+    details.append(allergenSection);
+    const alternatives = Array.from(new Set(meal.ingredients.flatMap(function (item) {
+      return NUTRITION_INGREDIENTS[item[0]].swaps || [];
+    }))).slice(0, 5);
+    const alternativeSection = node("div", "recipe-detail-section");
+    alternativeSection.append(node("h4", "", "Ingredient alternatives"), node("p", "", alternatives.join("; ") + "."));
+    details.append(alternativeSection);
+    content.append(details);
+
+    const actions = node("div", "recipe-actions");
+    const add = node("button", "button button-primary recipe-add", "Add to today's plan");
+    add.type = "button";
+    add.addEventListener("click", function () { addRecipeToPlan(meal, Number(portionInput.value)); });
+    const favorite = node("button", "recipe-favorite", state.mealFavorites.includes(meal.id) ? "Saved" : "Save");
+    favorite.type = "button";
+    favorite.setAttribute("aria-pressed", String(state.mealFavorites.includes(meal.id)));
+    favorite.addEventListener("click", function () {
+      if (state.mealFavorites.includes(meal.id)) state.mealFavorites = state.mealFavorites.filter(function (id) { return id !== meal.id; });
+      else state.mealFavorites.push(meal.id);
+      saveState();
+      renderMeals();
+    });
+    actions.append(add, favorite);
+    content.append(actions);
+
+    portionInput.addEventListener("input", function () { updateRecipeCard(card, meal, Number(portionInput.value)); });
+    card.append(content);
+    updateRecipeCard(card, meal, 1);
+    return card;
+  }
+
+  function renderGoalMealPlan(phase, grid) {
+    const plan = MEAL_PLAN_CATEGORIES[phase];
+    const banner = node("article", "meal-plan-banner");
+    const copy = node("div", "meal-plan-copy");
+    copy.append(
+      node("p", "eyebrow", "GOAL-BASED MEAL IDEAS"),
+      node("h3", "", plan.title),
+      node("p", "", plan.description)
+    );
+    banner.append(copy, foodImage(plan.photo, plan.photoAlt, "meal-plan-image"));
+    grid.append(banner);
+
+    const searchTerm = document.getElementById("recipe-search").value.trim().toLowerCase();
+    const diet = document.getElementById("recipe-diet").value;
+    const favoritesOnly = document.getElementById("favorites-only").checked;
+    const meals = GOAL_MEALS.filter(function (meal) {
+      if (meal.phase !== phase || !mealMatchesDiet(meal, diet)) return false;
+      if (favoritesOnly && !state.mealFavorites.includes(meal.id)) return false;
+      const searchable = meal.title + " " + meal.preparation + " " + meal.ingredients.map(function (item) {
+        return NUTRITION_INGREDIENTS[item[0]].name;
+      }).join(" ");
+      return !searchTerm || searchable.toLowerCase().includes(searchTerm);
+    });
+    const resultCount = document.getElementById("recipe-result-count");
+    resultCount.textContent = meals.length + (meals.length === 1 ? " meal shown" : " meals shown");
+    if (!meals.length) {
+      grid.append(node("p", "recipe-empty", "No meals match those search and dietary filters. Try changing a filter or search term."));
+      return;
+    }
+    [
+      ["Breakfast", "Breakfast"],
+      ["Lunch", "Lunch"],
+      ["Dinner", "Dinner"],
+      ["Snack", "Snacks"]
+    ].forEach(function (category) {
+      const options = meals.filter(function (meal) { return meal.type === category[0]; });
+      if (!options.length) return;
+      const group = node("section", "recipe-category-group");
+      const heading = node("div", "recipe-category-heading");
+      heading.append(node("h3", "", category[1]), node("span", "", options.length + (options.length === 1 ? " meal" : " meals")));
+      const cards = node("div", "recipe-category-grid");
+      options.forEach(function (meal) { cards.append(createRecipeCard(meal)); });
+      group.append(heading, cards);
+      grid.append(group);
+    });
+  }
+
+  function renderDailyMealPlan() {
+    const list = document.getElementById("planned-meals");
+    const totalsEl = document.getElementById("meal-plan-totals");
+    const groceryList = document.getElementById("grocery-list");
+    if (!list || !totalsEl || !groceryList) return;
+    list.replaceChildren();
+    totalsEl.replaceChildren();
+    groceryList.replaceChildren();
+    const summary = summarizeMealPlan(state.plannedMeals);
+
+    if (!state.plannedMeals.length) list.append(node("p", "planner-empty", "Your plan is empty. Add meals above to build today's menu."));
+    state.plannedMeals.forEach(function (planned) {
+      const meal = GOAL_MEALS_BY_ID.get(planned.id);
+      if (!meal) return;
+      const nutrition = calculateMealNutrition(meal, planned.servings);
+
+      const row = node("article", "planned-meal-row");
+      const description = node("div", "planned-meal-description");
+      description.append(node("span", "eyebrow", meal.phase + " · " + meal.type), node("strong", "", meal.title));
+      const input = node("input", "planned-meal-servings");
+      input.type = "number";
+      input.min = "0.25";
+      input.max = "10";
+      input.step = "0.25";
+      input.value = formatAmount(planned.servings);
+      input.setAttribute("aria-label", "Portions of " + meal.title + " in today's plan");
+      input.addEventListener("change", function () {
+        const servings = Number(input.value);
+        if (!Number.isFinite(servings) || servings <= 0) {
+          input.value = formatAmount(planned.servings);
+          return;
+        }
+        planned.servings = Math.min(10, Math.max(0.25, servings));
+        input.value = formatAmount(planned.servings);
+        saveState();
+        renderDailyMealPlan();
+      });
+      const remove = node("button", "quiet-button planned-meal-remove", "Remove");
+      remove.type = "button";
+      remove.setAttribute("aria-label", "Remove " + meal.title + " from today's plan");
+      remove.addEventListener("click", function () {
+        state.plannedMeals = state.plannedMeals.filter(function (item) { return item.id !== planned.id; });
+        saveState();
+        renderDailyMealPlan();
+      });
+      const rowTotals = node("p", "planned-meal-macros", Math.round(nutrition.calories) + " kcal · " + formatAmount(nutrition.protein) + " g protein");
+      row.append(description, input, rowTotals, remove);
+      list.append(row);
+    });
+
+    [
+      ["Calories", Math.round(summary.totals.calories) + " kcal"],
+      ["Protein", formatAmount(summary.totals.protein) + " g"],
+      ["Carbohydrates", formatAmount(summary.totals.carbs) + " g"],
+      ["Fat", formatAmount(summary.totals.fat) + " g"],
+      ["Fibre", formatAmount(summary.totals.fibre) + " g"]
+    ].forEach(function (metric) {
+      const card = node("article", "nutrition-target");
+      card.append(node("span", "eyebrow", metric[0]), node("strong", "", metric[1]));
+      totalsEl.append(card);
+    });
+
+    summary.groceries.forEach(function (entry) {
+      groceryList.append(node("li", "", formatAmount(entry[1]) + " g " + NUTRITION_INGREDIENTS[entry[0]].name));
+    });
+    if (!summary.groceries.length) groceryList.append(node("li", "grocery-empty", "Your grocery list will appear when you add a meal."));
+  }
+
   function renderMeals() {
     const mealDay = document.getElementById("meal-day");
-    if (state.profile && ["Vegetarian", "Vegan", "Plant-forward"].includes(state.profile.diet)) mealDay.value = "plant";
-    const meals = MEALS[mealDay.value] || MEALS.day;
+    if (mealDay.value === "day" && state.profile && ["Vegetarian", "Vegan", "Plant-forward"].includes(state.profile.diet)) mealDay.value = "plant";
     const grid = document.getElementById("meal-grid");
+    const recipeControls = document.getElementById("recipe-controls");
+    const planner = document.getElementById("meal-planner");
     grid.replaceChildren();
+    if (MEAL_PLAN_CATEGORIES[mealDay.value]) {
+      grid.classList.add("recipe-meal-grid");
+      recipeControls.hidden = false;
+      planner.hidden = false;
+      renderGoalMealPlan(mealDay.value, grid);
+      renderDailyMealPlan();
+      return;
+    }
+    const meals = MEALS[mealDay.value] || MEALS.day;
+    grid.classList.remove("recipe-meal-grid");
+    recipeControls.hidden = true;
+    planner.hidden = true;
     meals.forEach(function (meal) {
       const card = node("article", "meal-card");
       const art = node("div", "meal-visual meal-" + meal.color);
-      const artType = meal.type === "BREAKFAST" ? "breakfast" : meal.type === "LUNCH" ? "lunch" : meal.type === "DINNER" ? "dinner" : "snack";
-      const photo = foodImage(artType, "Photograph of " + meal.title, "meal-photo");
+      const photoKind = mealPhotoKind(meal);
+      const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind), "meal-photo");
       art.append(photo, node("span", "eyebrow", meal.type));
       const content = node("div", "meal-content");
       content.append(node("h3", "", meal.title), node("p", "", meal.description));
@@ -727,7 +1158,26 @@
       grid.append(card);
     });
   }
-  document.getElementById("meal-day").addEventListener("change", renderMeals);
+  document.getElementById("meal-day").addEventListener("change", function () {
+    const phase = document.getElementById("meal-day").value;
+    if (MEAL_PLAN_CATEGORIES[phase]) {
+      state.nutritionPhase = phase;
+      state.nutritionMeals = null;
+      document.getElementById("nutrition-phase").value = phase;
+      saveState();
+      renderNutrition();
+      renderDashboard();
+    }
+    renderMeals();
+  });
+  document.getElementById("recipe-search").addEventListener("input", renderMeals);
+  document.getElementById("recipe-diet").addEventListener("change", renderMeals);
+  document.getElementById("favorites-only").addEventListener("change", renderMeals);
+  document.getElementById("clear-meal-plan").addEventListener("click", function () {
+    state.plannedMeals = [];
+    saveState();
+    renderDailyMealPlan();
+  });
   renderMeals();
 
   const swaps = document.getElementById("swap-grid");
@@ -848,13 +1298,17 @@
 
   const nutritionPhase = document.getElementById("nutrition-phase");
   nutritionPhase.value = state.nutritionPhase;
+  document.getElementById("meal-day").value = state.nutritionPhase;
   nutritionPhase.addEventListener("change", function () {
     state.nutritionPhase = nutritionPhase.value;
     state.nutritionMeals = null;
+    document.getElementById("meal-day").value = state.nutritionPhase;
     saveState();
     renderNutrition();
     renderDashboard();
+    renderMeals();
   });
+  renderMeals();
 
   if (state.profile) state.schedule = buildSchedule(state.profile);
   loadProfileForm();

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0b1019">
   <meta name="description" content="Health Blueprint - A healthier life, by design">
   <title>Health Blueprint - A healthier life, by design</title>
-  <link rel="stylesheet" href="styles.css?v=4">
+  <link rel="stylesheet" href="styles.css?v=5">
 </head>
 <body>
   <header class="site-header">
@@ -337,7 +337,9 @@
             </select>
           </label>
         </div>
-        <p class="estimate-note">All calories, macros, and portions are approximate fictional examples, not personal targets or medical advice.</p>
+        <p class="estimate-note">Daily targets are illustrative estimates, not personal prescriptions. Recipe nutrition below is calculated from generic ingredient data and measured portions; brands and preparation change the result.</p>
+        <p class="calorie-balance-note"><strong>Weight change:</strong> overall energy intake relative to energy used over time is the main driver of weight change; no single food or meal determines it.</p>
+        <p class="nutrition-source-note">Recipe estimates use representative generic food-composition values per 100 g; see <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer">USDA FoodData Central</a>. Values are rounded and can vary by brand, cut, and preparation.</p>
         <div id="nutrition-targets" class="nutrition-targets"></div>
         <div id="daily-meals" class="daily-meals"></div>
       </section>
@@ -370,14 +372,36 @@
       </section>
       <div class="nutrition-highlight"><div><span class="pill pill-light">A SIMPLE PLACE TO BEGIN</span><h2>Balance isn’t<br>about being <span>perfect.</span></h2><p>Try pairing a satisfying source of energy with something that helps you feel nourished. Your needs are personal; there’s no one-size-fits-all plate.</p></div><div class="plate-art" aria-label="Illustration of a colourful balanced plate"><div class="plate plate-one"></div><div class="plate plate-two"></div><div class="plate plate-three"></div><span class="plate-sprig">✳</span></div></div>
       <section class="section-block">
-        <div class="section-heading"><div><p class="eyebrow">EASY IDEAS, ZERO PRESSURE</p><h2>Pick a meal to explore</h2></div><label class="meal-filter-label">Plan for <select id="meal-day"><option value="day">A typical day</option><option value="busy">A busy day</option><option value="plant">Plant-forward</option></select></label></div>
+        <div class="section-heading"><div><p class="eyebrow">EASY IDEAS, ZERO PRESSURE</p><h2>Pick a meal to explore</h2></div><label class="meal-filter-label">Meal ideas <select id="meal-day"><optgroup label="Flexible plans"><option value="day">A typical day</option><option value="busy">A busy day</option><option value="plant">Plant-forward</option></optgroup><optgroup label="Goal-based plans"><option value="cut">Cutting — Fat Loss</option><option value="bulk">Bulking — Muscle Growth</option><option value="maintain">Maintaining — General Health and Fitness</option></optgroup></select></label></div>
+        <div id="recipe-controls" class="recipe-controls" hidden>
+          <label for="recipe-search">Search meals or ingredients<input id="recipe-search" type="search" placeholder="Try salmon, oats, or berries"></label>
+          <label for="recipe-diet">Dietary filter<select id="recipe-diet"><option value="all">All meals</option><option value="vegetarian">Vegetarian</option><option value="vegan">Vegan</option><option value="pescatarian">Pescatarian</option><option value="gluten-free">Gluten-free ingredients</option><option value="dairy-free">Dairy-free ingredients</option></select></label>
+          <label class="favorites-filter"><input id="favorites-only" type="checkbox"> Saved favorites only</label>
+          <p id="recipe-result-count" aria-live="polite"></p>
+        </div>
         <div id="meal-grid" class="meal-grid"></div>
+      </section>
+      <section id="meal-planner" class="meal-planner" aria-labelledby="meal-planner-heading" hidden>
+        <div class="section-heading">
+          <div><p class="eyebrow">YOUR PLAN · SAVED IN THIS BROWSER</p><h2 id="meal-planner-heading">Today's meal planner</h2></div>
+          <button id="clear-meal-plan" class="quiet-button" type="button">Clear today's plan</button>
+        </div>
+        <div id="planned-meals" class="planned-meals"></div>
+        <div class="planner-summary">
+          <h3>Daily nutrition totals</h3>
+          <div id="meal-plan-totals" class="nutrition-targets"></div>
+        </div>
+        <div class="planner-grocery">
+          <h3>Grocery list</h3>
+          <ul id="grocery-list" class="grocery-list"></ul>
+        </div>
+        <p class="planner-note">Amounts and nutrition totals recalculate when portions change. This planner stores data locally in this browser.</p>
       </section>
       <section class="section-block">
         <div class="section-heading"><div><p class="eyebrow">A LITTLE FLEXIBILITY GOES A LONG WAY</p><h2>Simple food swaps</h2></div></div>
         <div id="swap-grid" class="swap-grid"></div>
       </section>
-      <aside class="gentle-note health-disclaimer"><span class="note-icon" aria-hidden="true">✳</span><p><strong>General health disclaimer:</strong> This student prototype provides fictional sample plans and broad educational information, not medical or dietetic advice. Nutrition values and targets are estimates, not prescriptions. Do not use the examples as a substitute for advice from a qualified professional. Food suggestions are not allergen-safe guarantees; check labels and ingredients yourself.</p></aside>
+      <aside class="gentle-note health-disclaimer"><span class="note-icon" aria-hidden="true">✳</span><p><strong>General health disclaimer:</strong> This student prototype provides general food information, not medical or dietetic advice. Recipe values are approximate estimates based on generic ingredient data; cooking methods, brands, and actual portions vary. Food suggestions are not allergen-safe guarantees; check labels and cross-contact risks yourself, and consult a qualified professional for individual advice.</p></aside>
     </section>
 
     <section id="progress" class="view page-shell" data-view hidden>
@@ -398,6 +422,7 @@
     <a href="#home" class="back-top">Back to top ↑</a>
   </footer>
   <script src="data.js"></script>
-  <script src="app.js?v=6"></script>
+  <script src="nutrition-data.js?v=1"></script>
+  <script src="app.js?v=9"></script>
 </body>
 </html>
