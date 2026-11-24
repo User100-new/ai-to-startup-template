@@ -260,6 +260,11 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .cardio-benefit { margin: 8px 0 5px; color: #96a5b7; font-size: 9px; line-height: 1.6; }
 .cardio-goal { color: #9ed5bb; font-size: 9px; }
 .cardio-add { margin-top: auto; padding: 6px 8px; border: 1px solid #3a4b60; border-radius: 4px; color: #bdd1e9; background: #192536; cursor: pointer; font-size: 9px; }
+.cardio-category { grid-column: 1 / -1; margin: 12px 0 2px; color: #dbe7f6; font-size: 12px; }
+.cardio-category:first-child { margin-top: 0; }
+.cardio-list-card { min-height: auto; }
+.cardio-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 6px 12px; margin: 0; padding: 0; list-style: none; }
+.cardio-list li { padding: 8px 10px; border-left: 2px solid #668bb4; border-radius: 4px; color: #c7d4e5; background: #151f2d; font-size: 10px; }
 .nutrition-planner,.food-library { margin-top: 40px; padding: 22px; border: 1px solid #29394b; border-radius: 9px; background: #111824; }
 .workout-nutrition { margin-top: 40px; padding: 22px; border: 1px solid #29394b; border-radius: 9px; background: #111824; }
 .timed-meal-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }

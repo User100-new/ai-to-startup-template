@@ -6,16 +6,9 @@ const GOALS = [
   { id: "health", icon: "♡", title: "Improve my overall health", description: "Take small steps toward feeling good.", color: "rose" }
 ];
 
-const WORKOUT_FILTERS = ["Everything", "Strength", "Cardio", "Mobility", "At home"];
+const WORKOUT_FILTERS = ["Everything", "Strength"];
 
-const WORKOUTS = [
-  { id: "steady-strength", category: "Strength", level: "START GENTLE", duration: "20 min", name: "Everyday strength", description: "A welcoming full-body routine with a squat-focused strength movement.", detail: "Squat to a chair · Wall push-ups · Glute bridges · Standing marches", color: "blue", icon: "↗", image: "assets/workouts/steady-strength.jpg", imageAlt: "A woman performing a weighted squat while a coach observes.", muscleFocus: "Quads · glutes · hips" },
-  { id: "fresh-air", category: "Cardio", level: "FIND YOUR PACE", duration: "20–30 min", name: "Fresh-air walk", description: "A comfortable-paced walk outdoors or around your home.", detail: "Take a relaxed pace, bring water, and turn around whenever you like.", color: "green", icon: "☼", image: "assets/workouts/fresh-air.jpg", imageAlt: "Two hikers walking along an outdoor trail.", muscleFocus: "Calves · glutes" },
-  { id: "morning-reset", category: "Mobility", level: "SLOW IT DOWN", duration: "10 min", name: "A little morning stretch", description: "Gentle, optional movements to loosen up and greet the day.", detail: "Shoulder rolls · Easy side stretch · Ankle circles · Deep breaths", color: "lilac", icon: "≈", image: "assets/workouts/morning-reset.jpg", imageAlt: "A person holding a gentle kneeling side stretch outdoors.", muscleFocus: "Hips · shoulders" },
-  { id: "home-circuit", category: "At home", level: "NO EQUIPMENT", duration: "15 min", name: "Mat-based strength circuit", description: "Simple floor-based movements that can be adjusted to your comfort.", detail: "Bird-dogs · Modified push-ups · Glute bridges · Rest between moves", color: "gold", icon: "⌂", image: "assets/workouts/home-circuit.jpg", imageAlt: "People practicing floor-based bodyweight exercises on fitness mats.", muscleFocus: "Core · shoulders" },
-  { id: "steady-steps", category: "Cardio", level: "EASY RUN", duration: "15 min", name: "Walk-jog intervals", description: "Short, gentle jogging intervals with walking breaks between them.", detail: "Alternate an easy jog with a walk · Keep a conversational pace · Pause as needed", color: "blue", icon: "◌", image: "assets/workouts/steady-steps.jpg", imageAlt: "A group of runners jogging outdoors on a paved path.", muscleFocus: "Legs · glutes" },
-  { id: "core-balance", category: "Strength", level: "STEADY & STRONG", duration: "15 min", name: "Core & balance", description: "A patient, supportive practice for abdominal strength and stability.", detail: "Crunches · Dead bugs · Supported standing balance · Easy breathing", color: "mint", icon: "✳", image: "assets/workouts/core-balance.jpg", imageAlt: "A person performing a controlled floor crunch on an exercise mat.", muscleFocus: "Abdominals · core" }
-];
+const WORKOUTS = [];
 
 const MEALS = {
   day: [
