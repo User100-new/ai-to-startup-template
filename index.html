@@ -38,13 +38,22 @@
           <div>
             <p class="eyebrow"><span class="eyebrow-line"></span> PERSONALIZED FITNESS PLAN</p>
             <h1 id="fitness-plan-heading">Build a plan <span>for your routine.</span></h1>
-            <p class="welcome-copy">Choose demonstration preferences to generate a sample first-week plan. Please do not enter real health or personal information.</p>
+            <p class="welcome-copy">Share a few details to tailor your sample first-week plan. Your profile stays in this browser and is not sent to a server.</p>
           </div>
           <span class="pill pill-light">ABOUT 2 MINUTES</span>
         </div>
         <form id="fitness-form" class="fitness-form">
           <div class="profile-grid">
-            <label>Fitness goal
+            <label>Age
+              <input id="profile-age" name="age" type="number" min="13" max="100" step="1" inputmode="numeric" required>
+            </label>
+            <label>Height (cm)
+              <input id="profile-height" name="height" type="number" min="100" max="230" step="1" inputmode="numeric" required>
+            </label>
+            <label>Weight (kg)
+              <input id="profile-weight" name="weight" type="number" min="30" max="300" step="0.1" inputmode="decimal" required>
+            </label>
+            <label>Gym goal
               <select id="profile-goal" name="goal" required>
                 <option value="">Choose a goal</option>
                 <option value="strength">Build strength</option>
@@ -115,7 +124,7 @@
             </div>
             <p class="equipment-hint">Choose all that apply. Your sample plan will use exercises that fit your equipment.</p>
           </fieldset>
-          <p class="demo-data-note">Demo only: these general preferences are saved in this browser. Do not enter real personal or health information. Food suggestions are not allergen-safe guarantees.</p>
+          <p class="demo-data-note">Your age, height, weight, and preferences are saved only in this browser; they are not sent to a server. Avoid entering them on a shared device. Plans are general guidance, not medical advice, and food suggestions are not allergen-safe guarantees.</p>
           <button class="button button-primary" type="submit">Create my weekly plan <span aria-hidden="true">→</span></button>
         </form>
       </section>

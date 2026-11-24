@@ -1,4 +1,4 @@
-// Health Blueprint uses fictional recommendations and stores only demo preferences locally.
+// Health Blueprint uses general recommendations and stores profile details locally.
 (function () {
   "use strict";
 
@@ -23,6 +23,11 @@
     return withEquipment.length ? withEquipment : ["None"];
   }
 
+  function profileNumber(value, min, max) {
+    const number = Number(value);
+    return Number.isFinite(number) && number >= min && number <= max ? number : "";
+  }
+
   function readState() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
@@ -42,6 +47,9 @@
         goal: typeof preferences.goal === "string" ? preferences.goal : "",
         completed: [],
         profile: typeof preferences.goal === "string" ? {
+          age: profileNumber(preferences.age, 13, 100),
+          height: profileNumber(preferences.height, 100, 230),
+          weight: profileNumber(preferences.weight, 30, 300),
           goal: ["strength", "fat-loss", "endurance", "health"].includes(preferences.goal) ? preferences.goal : "health",
           experience: ["beginner", "intermediate", "advanced"].includes(preferences.experience) ? preferences.experience : "beginner",
           activity: ["sedentary", "light", "active", "very-active"].includes(preferences.activity) ? preferences.activity : "light",
@@ -74,6 +82,9 @@
           plannedMeals: state.plannedMeals,
           plannerDate: localDateKey()
         }, state.profile ? {
+          age: state.profile.age,
+          height: state.profile.height,
+          weight: state.profile.weight,
           goal: state.profile.goal,
           experience: state.profile.experience,
           activity: state.profile.activity,
@@ -187,6 +198,9 @@
   function loadProfileForm() {
     if (!state.profile) return;
     const profile = state.profile;
+    document.getElementById("profile-age").value = profile.age;
+    document.getElementById("profile-height").value = profile.height;
+    document.getElementById("profile-weight").value = profile.weight;
     document.getElementById("profile-goal").value = profile.goal || "";
     document.getElementById("profile-experience").value = profile.experience || "";
     document.getElementById("profile-activity").value = profile.activity || "";
@@ -1269,6 +1283,9 @@
     }
     document.getElementById("profile-days").classList.remove("choice-row-error");
     const profile = {
+      age: Number(document.getElementById("profile-age").value),
+      height: Number(document.getElementById("profile-height").value),
+      weight: Number(document.getElementById("profile-weight").value),
       goal: document.getElementById("profile-goal").value,
       experience: document.getElementById("profile-experience").value,
       activity: document.getElementById("profile-activity").value,
