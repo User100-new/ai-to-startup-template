@@ -374,15 +374,19 @@
     const container = document.getElementById("cardio-options");
     if (!container) return;
     container.replaceChildren();
-    CARDIO_OPTIONS.forEach(function (group) {
-      container.append(node("h3", "cardio-category", group.category));
-      const card = node("article", "cardio-card cardio-list-card");
+    CARDIO_OPTIONS.forEach(function (group, index) {
+      const section = node("section", "cardio-category-group");
+      section.setAttribute("aria-labelledby", "cardio-category-" + index);
+      const heading = node("div", "cardio-category-heading");
+      const title = node("h3", "cardio-category", group.category);
+      title.id = "cardio-category-" + index;
+      heading.append(title, node("span", "cardio-category-count", group.exercises.length + " options"));
       const list = node("ul", "cardio-list");
       group.exercises.forEach(function (exercise) {
         list.append(node("li", "", exercise));
       });
-      card.append(list);
-      container.append(card);
+      section.append(heading, list);
+      container.append(section);
     });
   }
 
