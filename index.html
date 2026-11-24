@@ -4,13 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b1019">
-  <meta name="description" content="A welcoming all-in-one fitness and nutrition guide to help you find your next healthy step.">
-  <title>Ascend Catalyst — Your wellness dashboard</title>
-  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Health Blueprint - A healthier life, by design">
+  <title>Health Blueprint - A healthier life, by design</title>
+  <link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
   <header class="site-header">
-    <a class="brand" href="#home" aria-label="Ascend Catalyst home">
+    <a class="brand" href="#home" aria-label="Health Blueprint home">
       <span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 32 32" focusable="false">
           <path class="mitochondrion-shell" d="M5.2 13.1C7.1 6.4 15.6 3.5 23 6.2c6.1 2.2 7.6 8.5 3.5 14.5-4 5.8-14.4 8.1-20.3 4.5-3.4-2.1-2.5-7.1-1-12.1Z"/>
@@ -18,7 +18,7 @@
           <circle class="mitochondrion-dot" cx="8.2" cy="21.4" r="1"/>
         </svg>
       </span>
-      <span>Ascend<span class="brand-light">catalyst</span></span>
+      <span class="brand-copy"><span>Health<span class="brand-light"> Blueprint</span></span><span class="brand-slogan">- A healthier life, by design</span></span>
     </a>
     <nav class="main-nav" aria-label="Main navigation">
       <a href="#home">Overview</a>
@@ -295,10 +295,31 @@
               <g class="muscle-zone" data-muscle="calves" tabindex="0" role="button" aria-label="Calves"><ellipse cx="105" cy="365" rx="18" ry="34"/><ellipse cx="155" cy="365" rx="18" ry="34"/></g>
             </svg>
           </div>
-          <aside class="muscle-results" id="muscle-results">
-            <p class="eyebrow">SELECT A MUSCLE</p>
-            <h3>Choose a highlighted area</h3>
-            <p>View exercises, sets, repetitions, and instructions for that muscle.</p>
+          <aside class="muscle-results">
+            <label class="muscle-group-label" for="muscle-group-select">Or choose a muscle group
+              <select id="muscle-group-select">
+                <option value="">Choose a group</option>
+                <option value="chest">Chest</option>
+                <option value="back">Back</option>
+                <option value="shoulders">Shoulders</option>
+                <option value="biceps">Biceps</option>
+                <option value="triceps">Triceps</option>
+                <option value="forearms">Forearms and grip</option>
+                <option value="trapezius">Trapezius</option>
+                <option value="quadriceps">Quadriceps</option>
+                <option value="hamstrings">Hamstrings</option>
+                <option value="glutes">Glutes</option>
+                <option value="calves">Calves</option>
+                <option value="hip-adductors-abductors">Hip adductors and abductors</option>
+                <option value="core">Abdominals and core</option>
+              </select>
+            </label>
+            <p class="muscle-library-note">These are exercise ideas, not a prescribed plan; choose movements, equipment, and effort that suit you.</p>
+            <div id="muscle-results" aria-live="polite">
+              <p class="eyebrow">SELECT A MUSCLE</p>
+              <h3>Choose a highlighted area</h3>
+              <p>Browse the exercise options for that group.</p>
+            </div>
           </aside>
         </div>
       </section>
@@ -380,7 +401,7 @@
   </main>
 
   <footer class="site-footer">
-    <a class="brand footer-brand" href="#home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="mitochondrion-shell" d="M5.2 13.1C7.1 6.4 15.6 3.5 23 6.2c6.1 2.2 7.6 8.5 3.5 14.5-4 5.8-14.4 8.1-20.3 4.5-3.4-2.1-2.5-7.1-1-12.1Z"/><path class="mitochondrion-fold" d="M8 11.4c2.2-2.8 5-2.7 6.2-.5 1.1 2.1-1.6 3.2-1.8 5.1-.2 1.8 2.5 2.2 3.3 4 .8 1.9-.2 3.3-1.9 3.8m2.8-17.2c1.9 1.1 2.3 2.7 1.2 4.1-1.1 1.4-2.8 2.2-2.1 4.1.6 1.6 3 1.9 3.6 3.7.4 1.2-.1 2.4-1.3 3.4m4-13.9c2.1 1.2 2.3 3.2 1.2 4.6-.9 1.2-2.2 2.1-1.7 3.7.3.9 1.2 1.5 2.2 1.9"/><circle class="mitochondrion-dot" cx="8.2" cy="21.4" r="1"/></svg></span><span>ascend<span class="brand-light">catalyst</span></span></a>
+    <a class="brand footer-brand" href="#home" aria-label="Health Blueprint home"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path class="mitochondrion-shell" d="M5.2 13.1C7.1 6.4 15.6 3.5 23 6.2c6.1 2.2 7.6 8.5 3.5 14.5-4 5.8-14.4 8.1-20.3 4.5-3.4-2.1-2.5-7.1-1-12.1Z"/><path class="mitochondrion-fold" d="M8 11.4c2.2-2.8 5-2.7 6.2-.5 1.1 2.1-1.6 3.2-1.8 5.1-.2 1.8 2.5 2.2 3.3 4 .8 1.9-.2 3.3-1.9 3.8m2.8-17.2c1.9 1.1 2.3 2.7 1.2 4.1-1.1 1.4-2.8 2.2-2.1 4.1.6 1.6 3 1.9 3.6 3.7.4 1.2-.1 2.4-1.3 3.4m4-13.9c2.1 1.2 2.3 3.2 1.2 4.6-.9 1.2-2.2 2.1-1.7 3.7.3.9 1.2 1.5 2.2 1.9"/><circle class="mitochondrion-dot" cx="8.2" cy="21.4" r="1"/></svg></span><span class="brand-copy"><span>Health<span class="brand-light"> Blueprint</span></span><span class="brand-slogan">- A healthier life, by design</span></span></a>
     <p>Student prototype created for a university project. Not a real commercial service. General information only—not medical advice; nutrition values are estimates. Check all food labels for allergens.</p>
     <a href="#home" class="back-top">Back to top ↑</a>
   </footer>

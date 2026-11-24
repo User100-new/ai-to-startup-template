@@ -1,4 +1,4 @@
-// Friendly starter ideas for the Ascend Catalyst prototype.
+// Friendly starter ideas for the Health Blueprint prototype.
 const GOALS = [
   { id: "strength", icon: "↗", title: "Build muscle & strength", description: "Feel stronger, one rep at a time.", color: "blue" },
   { id: "body-composition", icon: "✳", title: "Reduce body fat", description: "Explore gradual, sustainable habits.", color: "gold" },

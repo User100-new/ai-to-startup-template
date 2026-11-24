@@ -1,8 +1,8 @@
-// Ascend Catalyst uses fictional recommendations and stores only demo preferences locally.
+// Health Blueprint uses fictional recommendations and stores only demo preferences locally.
 (function () {
   "use strict";
 
-  const STORE_KEY = "ascend-catalyst";
+  const STORE_KEY = "health-blueprint";
   const EQUIPMENT_OPTIONS = ["None", "Dumbbells", "Barbell", "Squat rack", "Kettlebell", "Resistance bands", "Bench", "Cable machine", "Weight machines", "Pull-up bar"];
   const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionMeals: null, premium: false };
   let state = emptyState;
@@ -307,29 +307,50 @@
   ];
 
   const MUSCLE_WORKOUTS = {
-    chest: [{name:"Push-ups",prescription:"3 × 8–15","rest":"60–90 sec",instructions:"Keep a straight body line and lower with control."},{name:"Incline push-ups",prescription:"3 × 10–12",rest:"60 sec",instructions:"Use a counter or sturdy bench to make the movement easier."},{name:"Floor dumbbell press",prescription:"3 × 8–12",rest:"90 sec",instructions:"Press dumbbells upward while keeping wrists stacked."}],
-    shoulders: [{name:"Pike push-ups",prescription:"3 × 6–10",rest:"90 sec",instructions:"Keep elbows close and reach the top of your head toward the floor."},{name:"Band overhead press",prescription:"3 × 8–12",rest:"60–90 sec",instructions:"Press without leaning backward."},{name:"Lateral raises",prescription:"2–3 × 10–15",rest:"60 sec",instructions:"Raise arms slightly below shoulder height with soft elbows."}],
-    biceps: [{name:"Band curls",prescription:"3 × 10–15",rest:"60 sec",instructions:"Stand on the band and curl while keeping elbows close."},{name:"Hammer curls",prescription:"3 × 8–12",rest:"60 sec",instructions:"Use a neutral grip and lower dumbbells slowly."},{name:"Chin-ups",prescription:"2–3 × 5–10",rest:"90 sec",instructions:"Use assistance if needed and lead with the chest."}],
-    triceps: [{name:"Close-grip push-ups",prescription:"3 × 6–12",rest:"60–90 sec",instructions:"Keep elbows close to the body."},{name:"Overhead extensions",prescription:"3 × 10–12",rest:"60 sec",instructions:"Lower behind the head and keep elbows facing forward."},{name:"Bench dips",prescription:"2–3 × 8–12",rest:"60 sec",instructions:"Use a sturdy bench and keep the shoulders away from the ears."}],
-    abs: [{name:"Dead bug",prescription:"3 × 8 each side",rest:"45 sec",instructions:"Press your back gently into the floor while extending opposite limbs."},{name:"Forearm plank",prescription:"3 × 20–45 sec",rest:"45 sec",instructions:"Keep ribs down and avoid letting hips sag."},{name:"Reverse crunch",prescription:"3 × 10–15",rest:"45 sec",instructions:"Curl the pelvis toward the ribs without swinging."}],
-    quads: [{name:"Chair squats",prescription:"3 × 8–12",rest:"60–90 sec",instructions:"Sit back toward a chair and stand through the whole foot."},{name:"Reverse lunges",prescription:"3 × 8 each side",rest:"60–90 sec",instructions:"Step back softly and keep the front knee aligned."},{name:"Step-ups",prescription:"3 × 8–12 each side",rest:"60 sec",instructions:"Use a sturdy low step and drive through the working leg."}],
-    calves: [{name:"Standing calf raises",prescription:"3 × 12–20",rest:"45–60 sec",instructions:"Rise onto the toes, pause, then lower slowly."},{name:"Seated calf raises",prescription:"3 × 12–15",rest:"45 sec",instructions:"Keep the ankle controlled and the toes pointed forward."},{name:"Farmer walks",prescription:"3 × 30–45 sec",rest:"60 sec",instructions:"Walk tall with light weights and avoid shrugging."}],
-    traps: [{name:"Shrugs",prescription:"3 × 12–15",rest:"60 sec",instructions:"Lift shoulders straight upward without rolling them."},{name:"Prone Y raises",prescription:"3 × 8–12",rest:"60 sec",instructions:"Raise arms into a Y while keeping the neck long."},{name:"Face pulls",prescription:"3 × 12–15",rest:"60 sec",instructions:"Pull a band toward the forehead and separate the hands."}],
-    lats: [{name:"Band rows",prescription:"3 × 10–15",rest:"60–90 sec",instructions:"Pull elbows behind you and lower with control."},{name:"Lat pulldown",prescription:"3 × 8–12",rest:"90 sec",instructions:"Pull toward the upper chest without leaning excessively."},{name:"Assisted pull-ups",prescription:"3 × 5–10",rest:"90 sec",instructions:"Pull elbows down and keep ribs gently tucked."}],
-    lowerback: [{name:"Bird dog",prescription:"3 × 8 each side",rest:"45 sec",instructions:"Reach opposite limbs without twisting or arching."},{name:"Back extensions",prescription:"3 × 10–12",rest:"60 sec",instructions:"Lift with the glutes and keep the movement comfortable."},{name:"Good mornings",prescription:"2–3 × 10–12",rest:"60 sec",instructions:"Hinge at the hips with a neutral spine."}],
-    glutes: [{name:"Glute bridges",prescription:"3 × 10–15",rest:"60 sec",instructions:"Press through the feet and lift without arching."},{name:"Hip thrusts",prescription:"3 × 8–12",rest:"90 sec",instructions:"Use a sturdy bench and keep the chin tucked."},{name:"Kickbacks",prescription:"3 × 10–12 each side",rest:"45–60 sec",instructions:"Extend the leg from the hip without rotating the pelvis."}],
-    hamstrings: [{name:"Romanian deadlift",prescription:"3 × 8–12",rest:"90 sec",instructions:"Hinge the hips and keep weights close to the legs."},{name:"Hamstring walks",prescription:"3 × 20–30 sec",rest:"60 sec",instructions:"Move in a glute bridge position with small steps."},{name:"Sliding curls",prescription:"3 × 8–12",rest:"60 sec",instructions:"Press heels into sliders and curl the hips upward."}]
+    chest: { label: "Chest", exercises: ["Barbell bench press", "Dumbbell bench press", "Incline barbell press", "Incline dumbbell press", "Decline bench press", "Cable chest fly", "Dumbbell chest fly", "Pec deck fly", "Machine chest press", "Chest dips", "Push-ups", "Low-to-high cable fly", "High-to-low cable fly"] },
+    back: { label: "Back", exercises: ["Pull-ups", "Chin-ups", "Lat pulldown", "Close-grip lat pulldown", "Single-arm lat pulldown", "Barbell row", "Dumbbell row", "T-bar row", "Seated cable row", "Chest-supported row", "Machine row", "Straight-arm pulldown", "Deadlift", "Rack pull", "Back extension", "Dumbbell pullover"] },
+    shoulders: { label: "Shoulders", exercises: ["Barbell overhead press", "Dumbbell shoulder press", "Arnold press", "Machine shoulder press", "Dumbbell lateral raise", "Cable lateral raise", "Machine lateral raise", "Front raise", "Rear delt fly", "Reverse pec deck", "Face pull", "Upright row"] },
+    biceps: { label: "Biceps", exercises: ["Barbell curl", "EZ-bar curl", "Dumbbell curl", "Hammer curl", "Preacher curl", "Concentration curl", "Incline dumbbell curl", "Cable curl", "Bayesian cable curl", "Spider curl", "Reverse curl"] },
+    triceps: { label: "Triceps", exercises: ["Rope pushdown", "Straight-bar pushdown", "Skull crusher", "Overhead dumbbell extension", "Overhead cable extension", "Single-arm cable extension", "Close-grip bench press", "Triceps dips", "Dumbbell kickback", "Cross-body cable extension"] },
+    forearms: { label: "Forearms and grip", exercises: ["Wrist curl", "Reverse wrist curl", "Reverse barbell curl", "Farmer's carry", "Dead hang", "Wrist roller", "Plate pinch", "Cable wrist curl"] },
+    trapezius: { label: "Trapezius", exercises: ["Dumbbell shrug", "Barbell shrug", "Cable shrug", "Machine shrug", "Farmer's carry", "Prone Y-raise"] },
+    quadriceps: { label: "Quadriceps", exercises: ["Barbell back squat", "Front squat", "Hack squat", "Pendulum squat", "Leg press", "Leg extension", "Bulgarian split squat", "Walking lunge", "Reverse lunge", "Goblet squat", "Step-up", "Sissy squat", "Smith machine squat", "Belt squat"] },
+    hamstrings: { label: "Hamstrings", exercises: ["Romanian deadlift", "Stiff-leg deadlift", "Seated leg curl", "Lying leg curl", "Standing leg curl", "Nordic hamstring curl", "Glute-ham raise", "Good morning"] },
+    glutes: { label: "Glutes", exercises: ["Barbell hip thrust", "Glute bridge", "Cable kickback", "Bulgarian split squat", "Romanian deadlift", "Sumo deadlift", "Hip abduction machine", "Cable hip abduction", "Reverse lunge", "Step-up"] },
+    calves: { label: "Calves", exercises: ["Standing calf raise", "Seated calf raise", "Donkey calf raise", "Leg press calf raise", "Single-leg calf raise"] },
+    "hip-adductors-abductors": { label: "Hip adductors and abductors", exercises: ["Hip adduction machine", "Hip abduction machine", "Cable hip adduction", "Cable hip abduction", "Lateral lunge", "Copenhagen plank", "Banded lateral walk"] },
+    core: { label: "Abdominals and core", exercises: ["Cable crunch", "Hanging leg raise", "Hanging knee raise", "Decline sit-up", "Ab wheel rollout", "Machine abdominal crunch", "Reverse crunch", "Plank", "Side plank", "Russian twist", "Bicycle crunch", "Cable woodchopper", "Pallof press", "Dead bug", "Weighted crunch"] }
+  };
+  const MUSCLE_ZONE_GROUPS = {
+    chest: "chest",
+    shoulders: "shoulders",
+    biceps: "biceps",
+    triceps: "triceps",
+    traps: "trapezius",
+    lats: "back",
+    lowerback: "back",
+    glutes: "glutes",
+    hamstrings: "hamstrings",
+    calves: "calves",
+    abs: "core",
+    quads: "quadriceps"
   };
 
   function renderMuscleMuscle(muscle) {
     const results = document.getElementById("muscle-results");
     if (!results) return;
-    const title = muscle.replace("lowerback","Lower back").replace("lats","Latissimus dorsi").replace("abs","Abdominals").replace("quads","Quadriceps");
+    const groupKey = MUSCLE_ZONE_GROUPS[muscle] || muscle;
+    const group = MUSCLE_WORKOUTS[groupKey];
     results.replaceChildren();
-    results.append(node("p","eyebrow","MUSCLE: " + title.toUpperCase()), node("h3","",title.charAt(0).toUpperCase() + title.slice(1) + " exercises"));
-    (MUSCLE_WORKOUTS[muscle] || []).forEach(function (exercise) {
+    if (!group) {
+      results.append(node("p","eyebrow","SELECT A MUSCLE"), node("h3","","Choose a highlighted area"), node("p","","Browse the exercise options for that group."));
+      return;
+    }
+    document.getElementById("muscle-group-select").value = groupKey;
+    results.append(node("p","eyebrow","MUSCLE: " + group.label.toUpperCase()), node("h3","",group.label + " exercise options"));
+    group.exercises.forEach(function (exercise) {
       const card = node("article","muscle-exercise");
-      card.append(node("strong","",exercise.name), node("span","muscle-prescription",exercise.prescription + " · Rest " + exercise.rest), node("p","",exercise.instructions));
+      card.append(node("strong","",exercise));
       results.append(card);
     });
   }
@@ -350,6 +371,10 @@
       };
       zone.addEventListener("click", selectMuscle);
       zone.addEventListener("keydown", function (event) { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectMuscle(); } });
+    });
+    document.getElementById("muscle-group-select").addEventListener("change", function (event) {
+      document.querySelectorAll(".muscle-zone").forEach(function (item) { item.classList.remove("selected"); });
+      renderMuscleMuscle(event.currentTarget.value);
     });
   }
 
