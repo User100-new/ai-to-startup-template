@@ -734,10 +734,61 @@
     beefPotatoBowl: "Ground beef and potatoes served with peas."
   };
 
+  const MEAL_PHOTO_IDS = new Set(GOAL_MEALS.map(function (meal) { return meal.id; }));
+  const MEAL_PHOTO_PATHS = {
+    "cut-yogurt-blueberry-bowl": "assets/foods/yogurt-and-berries.jpg",
+    "cut-vegetable-omelette": "assets/foods/omelette.jpg",
+    "cut-cottage-raspberry-bowl": "assets/foods/cottage-cheese-bowl.jpg",
+    "cut-tuna-rice-bowl": "assets/foods/tuna-rice-bowl.jpg",
+    "bulk-eggs-avocado-toast": "assets/foods/avocado-egg-toast.jpg",
+    "bulk-high-protein-pancakes": "assets/foods/pancakes.jpg",
+    "bulk-beef-potato-bowl": "assets/foods/beef-potato-bowl.jpg",
+    "maintain-scrambled-eggs-toast": "assets/foods/eggs-on-toast.jpg"
+  };
+  const MEAL_PHOTO_CREDITS = {
+    "cut-grilled-chicken-salad": "Photo by Shixart1985 via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Fresh_garden_salad_with_grilled_chicken,_lettuce,_radishes,_and_a_creamy_dressing_undefined.jpg",
+    "cut-chicken-quinoa-bowl": "Photo by naotakem via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:%22Pilaf%22_of_brown_rice,_quinoa,_and_vegetables,_grilled_chicken_thigh_meat,_and_saut%C3%A9ed_broccoli_sprouts_%E9%95%B7%E7%B2%92%E7%8E%84%E7%B1%B3%E3%81%A8%E3%82%AD%E3%83%8C%E3%82%A2%E3%81%AE%E3%83%94%E3%83%A9%E3%83%95%E3%82%82%E3%81%A9%E3%81%8D%E3%80%81%E9%B6%8F%E3%83%A2%E3%83%A2%E3%81%AE%E3%82%B0%E3%83%AA%E3%83%AB%E3%80%81%E8%8A%BD%E3%82%AD%E3%83%A3%E3%83%99%E3%83%84%E3%81%AE%E3%82%BD%E3%83%86%E3%83%BC.jpg",
+    "cut-shrimp-salad": "Photo by E4024 via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Shrimp_salad_from_Turkey.jpg",
+    "cut-salmon-roast-vegetables": "Photo by HaJunkiyada via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Oven-baked_teriyaki_salmon_with_vegetables.jpg",
+    "cut-turkey-meatballs": "Photo by Missvain via Wikimedia Commons (CC BY 4.0). https://commons.wikimedia.org/wiki/File:Penne_and_turkey_meatballs_-_Jan_2022_-_Sarah_Stierch.jpg",
+    "cut-apple-yogurt": "Photo by Annabelle.Joseph via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Mid-day_snack.JPG",
+    "cut-boiled-eggs": "Photo by Denis kasozi via Wikimedia Commons (CC BY 4.0). https://commons.wikimedia.org/wiki/File:African_Boiled_eggs._01.jpg",
+    "cut-protein-oatmeal": "Photo by Vegan Feast Catering via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Oatmeal_in_Hazelnut_Kreme_and_Strawberries_(4837814834).jpg",
+    "cut-protein-smoothie": "Photo by Eric Schmuttenmaer from Wheaton, USA via Wikimedia Commons (CC BY-SA 2.0). https://commons.wikimedia.org/wiki/File:Banna_Yogurt_Smoothie.jpg",
+    "cut-cottage-berries": "Photo by Anna via Wikimedia Commons (CC BY 3.0). https://commons.wikimedia.org/wiki/File:Summer_Desert_(176103799).jpeg",
+    "bulk-peanut-protein-oats": "Photo by Clarissa Savel via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Oatmeal_with_Berries.jpg",
+    "bulk-smoothie-bowl": "Photo by Miscellaneous contributor via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Green_smoothie_bowl_with_berries_and_seeds.jpg",
+    "bulk-chicken-pesto-pasta": "Photo by Kunokuno via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Chicken_Pesto_Pasta.jpg",
+    "bulk-salmon-quinoa-bowl": "Photo by Ella Olsson from Stockholm, Sweden via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Salmon_and_Quinoa_dish_(39791934733).jpg",
+    "bulk-turkey-avocado-sandwich": "Photo by HaJunkiyada via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Open_turkey_sandwich_with_avocado_salad_and_pickles.jpg",
+    "bulk-steak-roast-potato": "Photo by HaJunkiyada via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Homemade_Steak_Lunch_with_Broccoli_and_Potatoes.jpg",
+    "bulk-beef-rice-burrito": "Photo by Alpha from Melbourne, Australia via Wikimedia Commons (CC BY-SA 2.0). https://commons.wikimedia.org/wiki/File:Insides_-_Original_Burrito_-_Salsas_Mexican_Grill_(4982696384).jpg",
+    "bulk-chicken-peanut-curry": "Photo by Another Believer via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Chicken,_Rice_%26_Peanut_Sauce_at_Nong%27s_Khao_Man_Gai,_Portland,_Oregon,_2025.jpg",
+    "bulk-salmon-sweet-potato": "Photo by HaJunkiyada via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Grilled_salmon_with_sweet_potatoes.jpg",
+    "bulk-mass-gainer-smoothie": "Photo by Shixart1985 via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Fresh_fruit_smoothie_being_poured_into_a_glass.jpg",
+    "bulk-trail-mix": "Photo by Famartin via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:2021-01-06_12_15_43_Cranberry_trail_mix_with_cranberries,_peanuts,_raisins,_walnuts,_almonds,_sunflower_seeds,_pepitas_in_the_Franklin_Farm_section_of_Oak_Hill,_Fairfax_County,_Virginia.jpg",
+    "maintain-balanced-overnight-oats": "Photo by Nervy8924 via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Protein_overnight_oats.jpg",
+    "maintain-berry-smoothie-bowl": "Photo by Sesily Kraight via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Smoothie_bowl_-_blueberry.jpg",
+    "maintain-mediterranean-chicken-bowl": "Photo by SaucyGlo via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Jamaican_jerk_chicken_%26_vegetables_over_quinoa.jpg",
+    "maintain-salmon-avocado-salad": "Photo by dronepicr via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Don_Antonio_salad_with_avocado,_tuna_belly_and_salmon_from_La_Gomera,_Spain_(48293935667).jpg",
+    "maintain-chickpea-quinoa-bowl": "Photo by Joey Doll via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Chickpea_quinoa_pilaf_(41367978140).jpg",
+    "maintain-chicken-vegetable-stir-fry": "Photo by Yummy O Yummy via Wikimedia Commons (CC BY 2.0). https://commons.wikimedia.org/wiki/File:Chicken_and_Vegetable_Stir-Fry_(15914100572).jpg",
+    "maintain-turkey-stuffed-peppers": "Photo by Wiki leylek via Wikimedia Commons (CC BY 4.0). https://commons.wikimedia.org/wiki/File:Baked_stuffed_peppers_with_rice._(3).jpg",
+    "maintain-lean-beef-tacos": "Photo by Horacio Cambeiro via Wikimedia Commons (CC BY-SA 3.0). https://commons.wikimedia.org/wiki/File:Argentine-style_hand-chopped_roasted_beef_tacos,_with_mozzarella,_caramelized_onions,_and_salsas.jpg",
+    "maintain-mediterranean-chicken-potatoes": "Photo by Silar via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:02023_0151_Roasted_Chicken_and_Potatoes.jpg",
+    "maintain-yogurt-parfait": "Photo by Kolforn via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:-2020-01-13_Fruit_and_Yogurt_Breakfast_Parfait,_Trimingham.JPG",
+    "maintain-rice-cakes-avocado": "Photo by HaJunkiyada via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Rice_Cake_with_Ricotta_and_Tomato.jpg",
+    "maintain-nuts-fresh-fruit": "Photo by HaJunkiyada via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Liat_Portal_for_Foodie_Disorder_-_Healthy_snack_plate_with_fruit_and_nuts.jpg",
+    "maintain-banana-protein-oatmeal": "Photo by Sannidhishetty via Wikimedia Commons (CC BY-SA 4.0). https://commons.wikimedia.org/wiki/File:Oatmeal_Bowl_with_Boiled_Egg,_Banana,_Dragon_Fruit,_Pomegranate,_and_Seeds.jpg"
+  };
+
   function foodImage(kind, alt, className) {
     const image = node("img", className || "food-photo");
-    image.src = FOOD_PHOTOS[kind] || FOOD_PHOTOS.grain;
+    image.src = MEAL_PHOTO_IDS.has(kind)
+      ? MEAL_PHOTO_PATHS[kind] || "assets/foods/meal-" + kind + ".jpg"
+      : FOOD_PHOTOS[kind] || FOOD_PHOTOS.grain;
     image.alt = alt;
+    if (MEAL_PHOTO_CREDITS[kind]) image.title = MEAL_PHOTO_CREDITS[kind];
     image.loading = "lazy";
     return image;
   }
@@ -876,7 +927,7 @@
         fat: Math.round(nutrition.fat),
         fibre: Math.round(nutrition.fibre),
         photo: mealPhotoKind(meal),
-        photoAlt: foodPhotoAlt(mealPhotoKind(meal)),
+        photoAlt: foodPhotoAlt(mealPhotoKind(meal), meal.title),
         share: slot.share
       };
     }).filter(Boolean);
@@ -961,71 +1012,8 @@
     }
   }
 
-  const MEAL_PHOTO_OVERRIDES = {
-    "cut-yogurt-blueberry-bowl": "dairy",
-    "cut-vegetable-omelette": "omelette",
-    "cut-protein-oatmeal": "oats",
-    "cut-cottage-raspberry-bowl": "cottageCheese",
-    "cut-egg-white-wrap": "breakfastBurrito",
-    "cut-grilled-chicken-salad": "chickenLunch",
-    "cut-tuna-rice-bowl": "tunaRiceBowl",
-    "cut-turkey-lettuce-wraps": "wrap",
-    "cut-chicken-quinoa-bowl": "chickenLunch",
-    "cut-shrimp-salad": "tunaSalad",
-    "cut-salmon-roast-vegetables": "chickenDinner",
-    "cut-lean-beef-stir-fry": "beefPotatoBowl",
-    "cut-chicken-sweet-potato": "chickenDinner",
-    "cut-turkey-meatballs": "chickenDinner",
-    "cut-cod-vegetables": "tunaSalad",
-    "cut-apple-yogurt": "dairy",
-    "cut-boiled-eggs": "egg",
-    "cut-protein-smoothie": "smoothie",
-    "cut-vegetables-hummus": "hummus",
-    "cut-cottage-berries": "cottageCheese",
-    "bulk-peanut-protein-oats": "oats",
-    "bulk-eggs-avocado-toast": "avocadoEggToast",
-    "bulk-high-protein-pancakes": "pancakes",
-    "bulk-breakfast-burrito": "breakfastBurrito",
-    "bulk-smoothie-bowl": "greenSmoothie",
-    "bulk-chicken-rice-bowl": "chickenLunch",
-    "bulk-beef-potato-bowl": "beefPotatoBowl",
-    "bulk-chicken-pesto-pasta": "pasta",
-    "bulk-salmon-quinoa-bowl": "tunaRiceBowl",
-    "bulk-turkey-avocado-sandwich": "grain",
-    "bulk-steak-roast-potato": "beefPotatoBowl",
-    "bulk-beef-rice-burrito": "beefPotatoBowl",
-    "bulk-chicken-peanut-curry": "chickenDinner",
-    "bulk-turkey-pasta-bolognese": "pasta",
-    "bulk-salmon-sweet-potato": "tunaRiceBowl",
-    "bulk-mass-gainer-smoothie": "smoothie",
-    "bulk-trail-mix": "spread",
-    "bulk-peanut-butter-banana-toast": "bananaPeanutButter",
-    "bulk-yogurt-granola": "dairy",
-    "bulk-ricecakes-peanut-butter": "spread",
-    "maintain-balanced-overnight-oats": "oats",
-    "maintain-scrambled-eggs-toast": "egg",
-    "maintain-berry-smoothie-bowl": "dairy",
-    "maintain-potato-skillet": "omelette",
-    "maintain-banana-protein-oatmeal": "oats",
-    "maintain-mediterranean-chicken-bowl": "chickenLunch",
-    "maintain-turkey-hummus-wrap": "wrap",
-    "maintain-salmon-avocado-salad": "tunaSalad",
-    "maintain-chicken-caesar-wrap": "chickenLunch",
-    "maintain-chickpea-quinoa-bowl": "plantLunch",
-    "maintain-chicken-vegetable-stir-fry": "chickenDinner",
-    "maintain-grilled-salmon-rice": "tunaRiceBowl",
-    "maintain-turkey-stuffed-peppers": "greens",
-    "maintain-lean-beef-tacos": "beefPotatoBowl",
-    "maintain-mediterranean-chicken-potatoes": "chickenDinner",
-    "maintain-apple-almond-butter": "spread",
-    "maintain-yogurt-parfait": "dairy",
-    "maintain-protein-smoothie": "smoothie",
-    "maintain-rice-cakes-avocado": "brownRice",
-    "maintain-nuts-fresh-fruit": "fruit"
-  };
-
   function mealPhotoKind(meal) {
-    if (MEAL_PHOTO_OVERRIDES[meal.id]) return MEAL_PHOTO_OVERRIDES[meal.id];
+    if (MEAL_PHOTO_IDS.has(meal.id)) return meal.id;
     if (meal.photo) return meal.photo;
     const title = meal.title.toLowerCase();
     if (title.includes("wrap")) return "wrap";
@@ -1048,7 +1036,8 @@
     return meal.photo || meal.foodKey || "grain";
   }
 
-  function foodPhotoAlt(kind) {
+  function foodPhotoAlt(kind, mealTitle) {
+    if (MEAL_PHOTO_IDS.has(kind) && mealTitle) return "Photograph of " + mealTitle + ".";
     return FOOD_PHOTO_ALTS[kind] || "Food photograph.";
   }
 
@@ -1103,7 +1092,7 @@
 
   function recipeImage(meal) {
     const photoKind = mealPhotoKind(meal);
-    return foodImage(photoKind, foodPhotoAlt(photoKind), "recipe-image");
+    return foodImage(photoKind, foodPhotoAlt(photoKind, meal.title), "recipe-image");
   }
 
   function renderDashboard() {
@@ -1223,7 +1212,7 @@
     meals.forEach(function (meal, index) {
       const card = node("article", "daily-meal");
       const photoKind = mealPhotoKind(meal);
-      const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind), "daily-meal-photo");
+      const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind, meal.title), "daily-meal-photo");
       card.append(photo, node("span", "eyebrow", meal.type), node("h3", "", meal.title), node("p", "meal-portion", meal.portion));
       card.append(node("p", "meal-macro", meal.calories + " kcal · " + meal.protein + " g protein · " + meal.carbs + " g carbs · " + meal.fat + " g fat · " + meal.fibre + " g fibre"));
       if (meal.recipe && meal.servings) {
@@ -1714,7 +1703,7 @@
       const card = node("article", "meal-card");
       const art = node("div", "meal-visual meal-" + meal.color);
       const photoKind = mealPhotoKind(meal);
-      const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind), "meal-photo");
+      const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind, meal.title), "meal-photo");
       art.append(photo, node("span", "eyebrow", meal.type));
       const content = node("div", "meal-content");
       content.append(node("h3", "", meal.title), node("p", "", meal.description));
