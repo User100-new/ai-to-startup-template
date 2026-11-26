@@ -5,7 +5,7 @@
   const STORE_KEY = "health-blueprint";
   const EQUIPMENT_OPTIONS = ["None", "Dumbbells", "Barbell", "Squat rack", "Kettlebell", "Resistance bands", "Bench", "Cable machine", "Weight machines", "Pull-up bar"];
   const GOAL_MEALS_BY_ID = new Map(GOAL_MEALS.map(function (meal) { return [meal.id, meal]; }));
-  const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionMeals: null, mealFavorites: [], plannedMeals: [], premium: false };
+  const emptyState = { goal: "", completed: [], profile: null, schedule: null, nutritionPhase: "maintain", nutritionProfile: null, nutritionPlan: [], nutritionMeals: null, mealFavorites: [], plannedMeals: [], premium: false };
   let state = emptyState;
   let storageAvailable = true;
   const notice = document.getElementById("storage-notice");
@@ -28,6 +28,19 @@
     return Number.isFinite(number) && number >= min && number <= max ? number : "";
   }
 
+  function nutritionProfileFrom(value) {
+    if (!value || typeof value !== "object") return null;
+    const units = value.units === "imperial" ? "imperial" : "metric";
+    return {
+      age: profileNumber(value.age, 18, 100),
+      height: profileNumber(value.height, units === "imperial" ? 47 : 120, units === "imperial" ? 91 : 230),
+      weight: profileNumber(value.weight, units === "imperial" ? 77 : 35, units === "imperial" ? 661.4 : 300),
+      sex: ["female", "male"].includes(value.sex) ? value.sex : "",
+      activity: ["sedentary", "light", "moderate", "very-active", "extra-active"].includes(value.activity) ? value.activity : "",
+      units: units
+    };
+  }
+
   function readState() {
     try {
       const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
@@ -42,6 +55,13 @@
         }).map(function (item) {
           return { id: item.id, servings: Math.min(10, Math.max(0.25, Number(item.servings))) };
         })
+        : [];
+      const nutritionPhase = ["maintain", "cut", "bulk"].includes(preferences.nutritionPhase) ? preferences.nutritionPhase : "maintain";
+      const nutritionPlan = Array.isArray(preferences.nutritionPlan)
+        ? preferences.nutritionPlan.filter(function (item) {
+          const meal = item && GOAL_MEALS_BY_ID.get(item.id);
+          return meal && meal.phase === nutritionPhase && meal.type === item.type;
+        }).map(function (item) { return { id: item.id, type: item.type }; })
         : [];
       return {
         goal: typeof preferences.goal === "string" ? preferences.goal : "",
@@ -59,7 +79,9 @@
           equipment: normalizeEquipment(preferences.equipment)
         } : null,
         schedule: null,
-        nutritionPhase: ["maintain", "cut", "bulk"].includes(preferences.nutritionPhase) ? preferences.nutritionPhase : "maintain",
+        nutritionPhase: nutritionPhase,
+        nutritionProfile: nutritionProfileFrom(preferences.nutritionProfile),
+        nutritionPlan: nutritionPlan,
         nutritionMeals: null,
         mealFavorites: mealFavorites,
         plannedMeals: plannedMeals,
@@ -77,6 +99,8 @@
         version: 3,
         preferences: Object.assign({
           nutritionPhase: state.nutritionPhase,
+          nutritionProfile: state.nutritionProfile,
+          nutritionPlan: state.nutritionPlan,
           premiumPreview: state.premium,
           mealFavorites: state.mealFavorites,
           plannedMeals: state.plannedMeals,
@@ -645,7 +669,7 @@
     oats: "assets/foods/oatmeal-bowl.jpg",
     egg: "assets/foods/eggs-on-toast.jpg",
     grain: "assets/foods/grain-and-vegetable-bowl.jpg",
-    brownRice: "assets/foods/brown-rice-bowl.svg",
+    brownRice: "assets/foods/grain-and-vegetable-bowl.jpg",
     beans: "assets/foods/vegetable-and-bean-salad.jpg",
     lentils: "assets/foods/lentils.jpg",
     blackBeans: "assets/foods/black-beans.jpg",
@@ -658,18 +682,18 @@
     plantDinner: "assets/foods/grain-and-vegetable-bowl.jpg",
     chickenLunch: "assets/foods/chicken-and-vegetables.jpg",
     chickenDinner: "assets/foods/chicken-and-vegetables.jpg",
-    wrap: "assets/foods/vegetable-wrap.svg",
-    pasta: "assets/foods/tomato-pasta.svg",
-    tofu: "assets/foods/tofu-stir-fry.svg",
-    hummus: "assets/foods/hummus-and-vegetables.svg",
-    peanutOats: "assets/foods/peanut-butter-banana-oats.svg",
-    bananaPeanutButter: "assets/foods/banana-peanut-butter.svg"
+    wrap: "assets/foods/vegetable-and-bean-salad.jpg",
+    pasta: "assets/foods/grain-and-vegetable-bowl.jpg",
+    tofu: "assets/foods/vegetable-and-bean-salad.jpg",
+    hummus: "assets/foods/fresh-vegetables.jpg",
+    peanutOats: "assets/foods/oatmeal-bowl.jpg",
+    bananaPeanutButter: "assets/foods/peanut-butter-banana-toast.jpg"
   };
   const FOOD_PHOTO_ALTS = {
     oats: "Bowl of oatmeal topped with berries.",
     egg: "Fried egg on toast.",
     grain: "Bowl of grains and mixed vegetables.",
-    brownRice: "Illustration of a bowl of brown rice.",
+    brownRice: "Photograph of a grain and vegetable bowl.",
     beans: "Chickpea and vegetable salad bowl.",
     lentils: "Cooked lentils topped with caramelized onions.",
     blackBeans: "Close-up photograph of black beans.",
@@ -682,12 +706,12 @@
     plantDinner: "Grain and vegetable bowl.",
     chickenLunch: "Chicken and vegetables on a plate.",
     chickenDinner: "Chicken and vegetables on a plate.",
-    wrap: "Illustration of a whole-grain wrap filled with vegetables.",
-    pasta: "Illustration of pasta with tomato sauce.",
-    tofu: "Illustration of tofu stir-fried with vegetables.",
-    hummus: "Illustration of hummus served with vegetable sticks.",
-    peanutOats: "Illustration of oatmeal topped with banana and peanut butter.",
-    bananaPeanutButter: "Illustration of banana with peanut butter."
+    wrap: "Photograph of a vegetable and bean salad.",
+    pasta: "Photograph of a grain and vegetable bowl.",
+    tofu: "Photograph of a vegetable and bean salad.",
+    hummus: "Photograph of fresh vegetables served with a dip.",
+    peanutOats: "Photograph of oatmeal topped with berries.",
+    bananaPeanutButter: "Photograph of toast topped with peanut butter and banana."
   };
 
   function foodImage(kind, alt, className) {
@@ -699,30 +723,151 @@
   }
 
   function foodArtType(foodName) {
-    if (foodName === "Rolled oats") return "oats";
-    if (foodName === "Eggs") return "egg";
-    if (foodName === "Brown rice") return "brownRice";
-    if (foodName === "Lentils") return "lentils";
-    if (foodName === "Black beans") return "blackBeans";
-    if (foodName === "Chicken breast") return "protein";
-    if (foodName === "Greek yogurt") return "dairy";
-    if (foodName === "Peanut butter") return "spread";
-    if (foodName === "Mixed vegetables") return "greens";
-    if (foodName === "Banana") return "fruit";
+    const name = foodName.toLowerCase();
+    if (/oat/.test(name)) return "oats";
+    if (/egg/.test(name)) return "egg";
+    if (/rice|quinoa|pasta|grain|bread|wrap|tortilla/.test(name)) return "grain";
+    if (/lentil/.test(name)) return "lentils";
+    if (/black bean/.test(name)) return "blackBeans";
+    if (/bean|chickpea|hummus/.test(name)) return "beans";
+    if (/chicken|turkey|beef|salmon|tuna|shrimp|cod|fish/.test(name)) return "protein";
+    if (/yogurt|milk|cheese|cottage/.test(name)) return "dairy";
+    if (/peanut|almond|cashew|walnut|seed|nut/.test(name)) return "spread";
+    if (/berry|strawberr|blueberr|raspberr/.test(name)) return "dairy";
+    if (/banana|apple|orange/.test(name)) return "fruit";
+    if (/spinach|lettuce|broccoli|pepper|tomato|cucumber|carrot|vegetable|greens|asparagus|zucchini|potato|cauliflower/.test(name)) return "greens";
     return "grain";
   }
 
+  function displayFoodAmount(grams) {
+    if (state.nutritionProfile && state.nutritionProfile.units === "imperial") {
+      return formatAmount(grams / 28.3495) + " oz";
+    }
+    return formatAmount(grams) + " g";
+  }
+
+  const DAILY_MEAL_SHARES = [
+    { type: "Breakfast", share: 0.25 },
+    { type: "Lunch", share: 0.30 },
+    { type: "Dinner", share: 0.30 },
+    { type: "Snack", share: 0.15 }
+  ];
+
+  function nutritionProfileComplete(profile) {
+    return Boolean(profile &&
+      Number.isFinite(Number(profile.age)) && Number(profile.age) >= 18 &&
+      Number.isFinite(Number(profile.height)) && Number(profile.height) > 0 &&
+      Number.isFinite(Number(profile.weight)) && Number(profile.weight) > 0 &&
+      ["female", "male"].includes(profile.sex) &&
+      ["sedentary", "light", "moderate", "very-active", "extra-active"].includes(profile.activity));
+  }
+
   function nutritionTargets() {
-    const activityEstimate = { sedentary: 1800, light: 2000, active: 2200, "very-active": 2400 }[state.profile && state.profile.activity] || 2000;
     const phase = state.nutritionPhase;
+    const profile = state.nutritionProfile;
+    if (nutritionProfileComplete(profile)) {
+      const heightCm = profile.units === "imperial" ? Number(profile.height) * 2.54 : Number(profile.height);
+      const weightKg = profile.units === "imperial" ? Number(profile.weight) / 2.20462 : Number(profile.weight);
+      const bmr = 10 * weightKg + 6.25 * heightCm - 5 * Number(profile.age) + (profile.sex === "male" ? 5 : -161);
+      const activityFactors = { sedentary: 1.2, light: 1.375, moderate: 1.55, "very-active": 1.725, "extra-active": 1.9 };
+      const tdee = bmr * activityFactors[profile.activity];
+      const calorieFloor = profile.sex === "female" ? 1200 : 1500;
+      const safeMaintenance = Math.max(calorieFloor, tdee);
+      const calories = Math.round(phase === "cut"
+        ? Math.max(calorieFloor, safeMaintenance - Math.min(500, safeMaintenance * 0.15))
+        : phase === "bulk"
+          ? safeMaintenance + Math.min(300, safeMaintenance * 0.075)
+          : safeMaintenance);
+      const protein = Math.round(Math.min(weightKg * (phase === "maintain" ? 1.6 : 1.8), calories * 0.35 / 4));
+      const fat = Math.round(Math.min(calories * 0.35 / 9, Math.max(weightKg * 0.6, calories * 0.25 / 9)));
+      const carbs = Math.max(0, Math.round((calories - protein * 4 - fat * 9) / 4));
+      return {
+        calories: calories,
+        protein: protein,
+        carbs: carbs,
+        fat: fat,
+        fibre: Math.round(calories / 1000 * 14),
+        bmr: Math.round(bmr),
+        tdee: Math.round(tdee),
+        weightKg: weightKg,
+        label: phase === "cut" ? "Moderate deficit estimate" : phase === "bulk" ? "Moderate surplus estimate" : "Estimated maintenance"
+      };
+    }
+
+    const activityEstimate = { sedentary: 1800, light: 2000, active: 2200, "very-active": 2400 }[state.profile && state.profile.activity] || 2000;
     const calories = activityEstimate + (phase === "bulk" ? 150 : phase === "cut" ? -150 : 0);
     const protein = Math.round(calories * 0.2 / 4);
     const fat = Math.round(calories * 0.3 / 9);
     const carbs = Math.max(50, Math.round((calories - protein * 4 - fat * 9) / 4));
-    return { calories: calories, protein: protein, carbs: carbs, fat: fat, label: "Illustrative " + phase + " estimate" };
+    return {
+      calories: calories, protein: protein, carbs: carbs, fat: fat,
+      fibre: Math.round(calories / 1000 * 14), label: "Illustrative " + phase + " estimate"
+    };
+  }
+
+  function recipeServingsForCalories(meal, calories) {
+    const perServing = calculateMealNutrition(meal, 1).calories;
+    return perServing > 0 ? Math.min(3, Math.max(0.5, calories / perServing)) : 1;
+  }
+
+  function recipeTargetScore(meal, targets, share) {
+    const servings = recipeServingsForCalories(meal, targets.calories * share);
+    const nutrition = calculateMealNutrition(meal, servings);
+    const expected = {
+      calories: targets.calories * share,
+      protein: targets.protein * share,
+      carbs: targets.carbs * share,
+      fat: targets.fat * share
+    };
+    return Math.abs(nutrition.calories - expected.calories) / Math.max(1, expected.calories) * 1.5 +
+      Math.abs(nutrition.protein - expected.protein) / Math.max(10, expected.protein) +
+      Math.abs(nutrition.carbs - expected.carbs) / Math.max(10, expected.carbs) * 0.7 +
+      Math.abs(nutrition.fat - expected.fat) / Math.max(5, expected.fat) * 0.7;
+  }
+
+  function recipesForGoalAndType(phase, type) {
+    return GOAL_MEALS.filter(function (meal) { return meal.phase === phase && meal.type === type; });
+  }
+
+  function buildPersonalizedMealPlan(targets) {
+    const plan = DAILY_MEAL_SHARES.map(function (slot) {
+      const choices = recipesForGoalAndType(state.nutritionPhase, slot.type);
+      if (!choices.length) return null;
+      const savedChoice = (state.nutritionPlan || []).find(function (entry) {
+        return entry.type === slot.type && choices.some(function (meal) { return meal.id === entry.id; });
+      });
+      const meal = savedChoice
+        ? choices.find(function (choice) { return choice.id === savedChoice.id; })
+        : choices.slice().sort(function (first, second) {
+          return recipeTargetScore(first, targets, slot.share) - recipeTargetScore(second, targets, slot.share);
+        })[0];
+      const servings = recipeServingsForCalories(meal, targets.calories * slot.share);
+      const nutrition = calculateMealNutrition(meal, servings);
+      return {
+        id: meal.id,
+        type: slot.type,
+        title: meal.title,
+        portion: formatAmount(servings) + " × " + meal.portion,
+        servings: servings,
+        recipe: meal,
+        calories: Math.round(nutrition.calories),
+        protein: Math.round(nutrition.protein),
+        carbs: Math.round(nutrition.carbs),
+        fat: Math.round(nutrition.fat),
+        fibre: Math.round(nutrition.fibre),
+        photo: mealPhotoKind(meal),
+        photoAlt: foodPhotoAlt(mealPhotoKind(meal)),
+        share: slot.share
+      };
+    }).filter(Boolean);
+    state.nutritionPlan = plan.map(function (meal) { return { id: meal.id, type: meal.type }; });
+    return plan;
   }
 
   function buildDailyMeals() {
+    if (nutritionProfileComplete(state.nutritionProfile)) {
+      return buildPersonalizedMealPlan(nutritionTargets());
+    }
     const targets = nutritionTargets();
     const plantBased = state.profile && ["Vegetarian", "Vegan", "Plant-forward"].includes(state.profile.diet);
     const proteinFood = plantBased ? "lentils" : "chicken";
@@ -732,6 +877,68 @@
       { type: "Dinner", title: proteinFood === "lentils" ? "Grain & vegetable bowl" : "Chicken & vegetables", portion: "1 plate", calories: Math.round(targets.calories * .32), protein: Math.round(targets.protein * .32), carbs: Math.round(targets.carbs * .32), fat: Math.round(targets.fat * .32), photo: plantBased ? "plantDinner" : "chickenDinner", alternatives: ["Tofu stir-fry", "Lentil pasta + vegetables"] },
       { type: "Snack", title: "Banana & peanut butter", portion: "1 banana + 1 tbsp", calories: Math.round(targets.calories * .13), protein: Math.round(targets.protein * .13), carbs: Math.round(targets.carbs * .13), fat: Math.round(targets.fat * .19), photo: "bananaPeanutButter", alternatives: plantBased ? ["Soy yogurt + fruit", "Hummus + toast"] : ["Greek yogurt + fruit", "Boiled eggs + fruit"] }
     ];
+  }
+
+  function setNutritionMeasurementUnits(units) {
+    const imperial = units === "imperial";
+    document.getElementById("nutrition-height-unit").textContent = imperial ? "in" : "cm";
+    document.getElementById("nutrition-weight-unit").textContent = imperial ? "lb" : "kg";
+    const height = document.getElementById("nutrition-height");
+    const weight = document.getElementById("nutrition-weight");
+    height.min = imperial ? "47" : "120";
+    height.max = imperial ? "91" : "230";
+    height.step = imperial ? "0.1" : "0.1";
+    weight.min = imperial ? "77" : "35";
+    weight.max = imperial ? "661.4" : "300";
+    weight.step = "0.1";
+  }
+
+  function loadNutritionForm() {
+    const profile = state.nutritionProfile;
+    document.getElementById("nutrition-units").value = profile ? profile.units : "metric";
+    document.getElementById("nutrition-age").value = profile && profile.age !== "" ? profile.age : "";
+    document.getElementById("nutrition-height").value = profile && profile.height !== "" ? profile.height : "";
+    document.getElementById("nutrition-weight").value = profile && profile.weight !== "" ? profile.weight : "";
+    document.getElementById("nutrition-sex").value = profile ? profile.sex : "";
+    document.getElementById("nutrition-activity").value = profile ? profile.activity : "";
+    setNutritionMeasurementUnits(profile ? profile.units : "metric");
+  }
+
+  function readNutritionForm() {
+    return nutritionProfileFrom({
+      age: document.getElementById("nutrition-age").value,
+      height: document.getElementById("nutrition-height").value,
+      weight: document.getElementById("nutrition-weight").value,
+      sex: document.getElementById("nutrition-sex").value,
+      activity: document.getElementById("nutrition-activity").value,
+      units: document.getElementById("nutrition-units").value
+    });
+  }
+
+  function updateNutritionProfile() {
+    state.nutritionProfile = readNutritionForm();
+    state.nutritionMeals = null;
+    saveState();
+    renderNutrition();
+    renderDashboard();
+  }
+
+  function convertNutritionMeasurements(from, to) {
+    if (from === to) return;
+    const height = document.getElementById("nutrition-height");
+    const weight = document.getElementById("nutrition-weight");
+    const heightValue = Number(height.value);
+    const weightValue = Number(weight.value);
+    if (Number.isFinite(heightValue) && height.value) {
+      const bounds = to === "imperial" ? [47, 91] : [120, 230];
+      const converted = to === "imperial" ? heightValue / 2.54 : heightValue * 2.54;
+      height.value = Math.min(bounds[1], Math.max(bounds[0], converted)).toFixed(1);
+    }
+    if (Number.isFinite(weightValue) && weight.value) {
+      const bounds = to === "imperial" ? [77, 661.4] : [35, 300];
+      const converted = to === "imperial" ? weightValue * 2.20462 : weightValue / 2.20462;
+      weight.value = Math.min(bounds[1], Math.max(bounds[0], converted)).toFixed(1);
+    }
   }
 
   function mealPhotoKind(meal) {
@@ -746,11 +953,12 @@
     if (title.includes("oat")) return "oats";
     if (title.includes("egg")) return "egg";
     if (title.includes("yogurt")) return "dairy";
+    if (/berry|strawberr|blueberr|raspberr/.test(title)) return "dairy";
     if (title.includes("peanut")) return "spread";
     if (title.includes("banana")) return "fruit";
     if (title.includes("lentil")) return "lentils";
     if (title.includes("bean") || title.includes("chickpea") || title.includes("hummus")) return "beans";
-    if (title.includes("chicken")) return "protein";
+    if (/chicken|turkey|beef|salmon|tuna|shrimp|cod|fish/.test(title)) return "protein";
     if (title.includes("rice")) return "brownRice";
     if (title.includes("grain") || title.includes("vegetable")) return "grain";
     return meal.photo || meal.foodKey || "grain";
@@ -809,50 +1017,9 @@
     return true;
   }
 
-  function escapeXml(value) {
-    return String(value).replace(/[&<>"']/g, function (character) {
-      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[character];
-    });
-  }
-
-  function ingredientIllustration(ingredient, x, y, angle, scale) {
-    const color = ingredient.color || "#c9ab7a";
-    let shape;
-    if (ingredient.art === "berry") shape = `<circle cx="-7" cy="-2" r="7" fill="${color}"/><circle cx="5" cy="-5" r="7" fill="${color}"/><circle cx="1" cy="7" r="7" fill="${color}"/><path d="M-2-10l4 4 5-5" fill="#668b58"/>`;
-    else if (ingredient.art === "leaf") shape = `<path d="M-15 3Q-7-13 0-3Q7-14 15 0Q7 12 0 5Q-8 13-15 3Z" fill="${color}"/><path d="M-12 3L12 0M0 5L0-4" stroke="#d1dfbd" stroke-width="1.5"/>`;
-    else if (ingredient.art === "egg") shape = `<ellipse cx="0" cy="0" rx="14" ry="10" fill="#f3eddf"/><circle cx="2" cy="0" r="5.5" fill="${color}"/>`;
-    else if (ingredient.art === "grain") shape = `<ellipse cx="-8" cy="0" rx="7" ry="3" transform="rotate(-25 -8 0)" fill="${color}"/><ellipse cx="3" cy="-5" rx="7" ry="3" transform="rotate(18 3 -5)" fill="${color}"/><ellipse cx="8" cy="6" rx="7" ry="3" transform="rotate(-15 8 6)" fill="${color}"/><circle cx="-1" cy="6" r="2" fill="#eee0bf"/>`;
-    else if (ingredient.art === "protein") shape = `<path d="M-14-5Q-10-12 2-10L13-5Q17 0 11 8L-5 10Q-16 7-14-5Z" fill="${color}"/><path d="M-7-4Q0 0 7 4M-4-7Q2-3 9 0" fill="none" stroke="#ecc7a2" stroke-width="2"/>`;
-    else if (ingredient.art === "fish") shape = `<path d="M-15 0Q-5-12 8-5L15-10L13 0L15 10L8 5Q-5 12-15 0Z" fill="${color}"/><circle cx="5" cy="-1" r="1.5" fill="#263345"/>`;
-    else if (ingredient.art === "seafood") shape = `<path d="M-12 7Q-16-3-7-9Q3-14 12-7Q16 0 9 8Q1 13-7 7M-10-5L-15-11M-8 8L-13 13" fill="none" stroke="${color}" stroke-width="5" stroke-linecap="round"/>`;
-    else if (ingredient.art === "dairy") shape = `<path d="M-12 7Q-16 2-10-2Q-8-12 1-8Q8-13 11-5Q18 1 11 7Q6 13-2 9Q-8 13-12 7Z" fill="${color}"/><path d="M-7 2Q0-3 7 2" fill="none" stroke="#cfbfa5" stroke-width="2"/>`;
-    else if (ingredient.art === "bread") shape = `<rect x="-13" y="-10" width="26" height="20" rx="7" fill="${color}"/><rect x="-9" y="-6" width="18" height="12" rx="4" fill="#e8c994"/>`;
-    else if (ingredient.art === "avocado") shape = `<ellipse cx="0" cy="0" rx="13" ry="10" transform="rotate(-25)" fill="#476c43"/><ellipse cx="0" cy="0" rx="9" ry="7" transform="rotate(-25)" fill="${color}"/><circle cx="1" cy="1" r="3" fill="#795332"/>`;
-    else if (ingredient.art === "beans") shape = `<ellipse cx="-7" cy="0" rx="8" ry="5" transform="rotate(25 -7 0)" fill="${color}"/><ellipse cx="6" cy="-4" rx="8" ry="5" transform="rotate(-20 6 -4)" fill="${color}"/><ellipse cx="5" cy="7" rx="8" ry="5" transform="rotate(15 5 7)" fill="${color}"/>`;
-    else if (ingredient.art === "nut") shape = `<ellipse cx="-7" cy="1" rx="6" ry="10" transform="rotate(-28 -7 1)" fill="${color}"/><ellipse cx="7" cy="-1" rx="6" ry="10" transform="rotate(28 7 -1)" fill="${color}"/><path d="M-9 1Q-7-2-5-3M5-1Q7-4 9-5" stroke="#edcf9f" stroke-width="1.5"/>`;
-    else if (ingredient.art === "citrus") shape = `<circle cx="0" cy="0" r="11" fill="${color}"/><path d="M0-10V10M-9-5L9 5M-9 5L9-5" stroke="#f8dda0" stroke-width="1.5"/>`;
-    else if (ingredient.art === "oil") shape = `<path d="M0-12Q-10 1-8 7Q-6 13 0 12Q7 11 8 5Q8 0 0-12Z" fill="${color}"/>`;
-    else if (ingredient.art === "chocolate") shape = `<rect x="-11" y="-9" width="22" height="18" rx="2" fill="${color}"/><path d="M0-9V9M-11 0H11" stroke="#a57a61" stroke-width="1.5"/>`;
-    else if (ingredient.art === "spice") shape = `<circle cx="-8" cy="-3" r="2.5" fill="${color}"/><circle cx="1" cy="-7" r="2" fill="${color}"/><circle cx="8" cy="1" r="3" fill="${color}"/><circle cx="-2" cy="6" r="2.5" fill="${color}"/>`;
-    else shape = `<circle cx="-7" cy="-2" r="7" fill="${color}"/><circle cx="5" cy="-4" r="7" fill="${color}"/><rect x="-4" y="3" width="11" height="9" rx="3" fill="${color}"/>`;
-    return `<g transform="translate(${x} ${y}) rotate(${angle}) scale(${scale})">${shape}</g>`;
-  }
-
   function recipeImage(meal) {
-    const hash = meal.id.split("").reduce(function (total, character) { return (total * 31 + character.charCodeAt(0)) >>> 0; }, 7);
-    const positions = [[126, 62], [163, 57], [198, 66], [135, 101], [177, 104], [207, 99]];
-    const art = meal.ingredients.slice(0, positions.length).map(function (item, index) {
-      const ingredient = NUTRITION_INGREDIENTS[item[0]];
-      const position = positions[(index + hash % positions.length) % positions.length];
-      return ingredientIllustration(ingredient, position[0], position[1], (hash + index * 47) % 35 - 17, 0.9 + (index % 2) * 0.12);
-    }).join("");
-    const tint = ["#29415b", "#29483f", "#594232"][hash % 3];
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180"><defs><linearGradient id="backdrop" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${tint}"/><stop offset="1" stop-color="#131d2b"/></linearGradient><filter id="shadow" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#080e17" flood-opacity=".5"/></filter></defs><rect width="320" height="180" fill="url(#backdrop)"/><circle cx="160" cy="81" r="68" fill="#c6d0cc" filter="url(#shadow)"/><circle cx="160" cy="81" r="58" fill="#f0eadc"/><circle cx="160" cy="81" r="48" fill="#e3dfd1"/>${art}<path d="M0 145H320V180H0Z" fill="#111a27" fill-opacity=".92"/><text x="160" y="167" text-anchor="middle" fill="#eef2f6" font-family="Arial,sans-serif" font-size="12" font-weight="600">${escapeXml(meal.title)}</text></svg>`;
-    const image = node("img", "recipe-image");
-    image.src = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-    image.alt = "Illustration of " + meal.title + " with " + meal.ingredients.map(function (item) { return NUTRITION_INGREDIENTS[item[0]].name; }).join(", ") + ".";
-    image.loading = "lazy";
-    return image;
+    const photoKind = mealPhotoKind(meal);
+    return foodImage(photoKind, foodPhotoAlt(photoKind), "recipe-image");
   }
 
   function renderDashboard() {
@@ -928,13 +1095,38 @@
     const targetsEl = document.getElementById("nutrition-targets");
     const mealsEl = document.getElementById("daily-meals");
     if (!targetsEl || !mealsEl) return;
+    const bmrSummary = document.getElementById("nutrition-bmr-summary");
+    const planTotals = document.getElementById("nutrition-plan-totals");
+    const mealTotals = document.getElementById("daily-meal-totals");
+    const personalized = nutritionProfileComplete(state.nutritionProfile);
     const targets = nutritionTargets();
     targetsEl.replaceChildren();
+    if (!personalized) {
+      bmrSummary.textContent = "Add your age, height, weight, sex, and activity level to calculate your personal estimates.";
+      [
+        ["PERSONAL CALORIE TARGET", "Complete profile", "No personal estimate yet"],
+        ["PROTEIN", "—", "Personal target"],
+        ["CARBOHYDRATES", "—", "Personal target"],
+        ["FATS", "—", "Personal target"],
+        ["FIBRE", "—", "General reference"]
+      ].forEach(function (metric) {
+        const card = node("article", "nutrition-target");
+        card.append(node("span", "eyebrow", metric[0]), node("strong", "", metric[1]), node("span", "target-note", metric[2]));
+        targetsEl.append(card);
+      });
+      mealsEl.replaceChildren(node("p", "planner-empty", "Complete the adult profile above to generate your personalized breakfast, lunch, dinner, and snack plan."));
+      planTotals.hidden = true;
+      state.nutritionMeals = null;
+      return;
+    }
+
+    bmrSummary.textContent = "Estimated BMR: " + targets.bmr + " kcal/day · Estimated TDEE: " + targets.tdee + " kcal/day · " + targets.label + ": " + targets.calories + " kcal/day. Cutting uses a moderate deficit (up to 500 kcal); bulking uses a moderate surplus (up to 300 kcal). A minimum calorie safeguard is applied.";
     [
-      ["ESTIMATED CALORIES", targets.calories + " kcal", "Illustrative only"],
-      ["EST. PROTEIN", "~" + targets.protein + " g", "Sample value"],
-      ["EST. CARBOHYDRATES", "~" + targets.carbs + " g", "Sample value"],
-      ["EST. FATS", "~" + targets.fat + " g", "Sample value"]
+      ["DAILY CALORIE TARGET", targets.calories + " kcal", targets.label],
+      ["PROTEIN TARGET", targets.protein + " g", "Personalized estimate"],
+      ["CARBOHYDRATE TARGET", targets.carbs + " g", "Personalized estimate"],
+      ["FAT TARGET", targets.fat + " g", "Personalized estimate"],
+      ["FIBRE REFERENCE", targets.fibre + " g", "About 14 g per 1,000 kcal"]
     ].forEach(function (metric) {
       const card = node("article", "nutrition-target");
       card.append(node("span", "eyebrow", metric[0]), node("strong", "", metric[1]), node("span", "target-note", metric[2]));
@@ -949,16 +1141,28 @@
       const photoKind = mealPhotoKind(meal);
       const photo = foodImage(photoKind, meal.photoAlt || foodPhotoAlt(photoKind), "daily-meal-photo");
       card.append(photo, node("span", "eyebrow", meal.type), node("h3", "", meal.title), node("p", "meal-portion", meal.portion));
-      card.append(node("p", "meal-macro", "~" + meal.calories + " kcal · ~" + meal.protein + "g protein · ~" + meal.carbs + "g carbs · ~" + meal.fat + "g fat"));
-      const replace = node("button", "meal-replace", "Replace with a similar food");
+      card.append(node("p", "meal-macro", meal.calories + " kcal · " + meal.protein + " g protein · " + meal.carbs + " g carbs · " + meal.fat + " g fat · " + meal.fibre + " g fibre"));
+      if (meal.recipe && meal.servings) {
+        const ingredients = node("details", "daily-meal-ingredients");
+        ingredients.append(node("summary", "", "Scaled ingredients"));
+        ingredients.append(recipeIngredientsList(meal.recipe, meal.servings));
+        card.append(ingredients);
+      }
+      const replace = node("button", "meal-replace", "Substitute with a similar meal");
       replace.type = "button";
       replace.addEventListener("click", function () {
-        const alternatives = meals[index].alternatives;
-        const currentAlternative = meals[index].selectedAlternative || 0;
-        const alternative = alternatives[currentAlternative % alternatives.length];
-        const alternativePhoto = mealPhotoKind({ title: alternative });
-        meals[index] = { ...meals[index], title: alternative, photo: alternativePhoto, photoAlt: foodPhotoAlt(alternativePhoto), selectedAlternative: currentAlternative + 1 };
-        state.nutritionMeals = meals;
+        const current = meals[index];
+        const choices = recipesForGoalAndType(state.nutritionPhase, current.type)
+          .filter(function (candidate) { return candidate.id !== current.id; })
+          .sort(function (first, second) {
+            return recipeTargetScore(first, targets, current.share) - recipeTargetScore(second, targets, current.share);
+          });
+        if (!choices.length) return;
+        const replacement = choices[0];
+        state.nutritionPlan = state.nutritionPlan.map(function (entry) {
+          return entry.type === current.type ? { id: replacement.id, type: current.type } : entry;
+        });
+        state.nutritionMeals = null;
         saveState();
         renderNutrition();
         renderDashboard();
@@ -966,6 +1170,28 @@
       card.append(replace);
       mealsEl.append(card);
     });
+
+    const plannedTotals = meals.reduce(function (total, meal) {
+      ["calories", "protein", "carbs", "fat", "fibre"].forEach(function (key) { total[key] += meal[key]; });
+      return total;
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0, fibre: 0 });
+    mealTotals.replaceChildren();
+    [
+      ["Calories", plannedTotals.calories, targets.calories, "kcal"],
+      ["Protein", plannedTotals.protein, targets.protein, "g"],
+      ["Carbohydrates", plannedTotals.carbs, targets.carbs, "g"],
+      ["Fats", plannedTotals.fat, targets.fat, "g"],
+      ["Fibre", plannedTotals.fibre, targets.fibre, "g"]
+    ].forEach(function (metric) {
+      const card = node("article", "nutrition-target");
+      card.append(
+        node("span", "eyebrow", metric[0]),
+        node("strong", "", Math.round(metric[1]) + " " + metric[3]),
+        node("span", "target-note", "Target: " + metric[2] + " " + metric[3])
+      );
+      mealTotals.append(card);
+    });
+    planTotals.hidden = false;
   }
 
   function renderFoodLibrary(query) {
@@ -1097,7 +1323,7 @@
     const list = node("ul", "recipe-ingredients-list");
     meal.ingredients.forEach(function (item) {
       const ingredient = NUTRITION_INGREDIENTS[item[0]];
-      list.append(node("li", "", formatAmount(item[1] * servings) + " g " + ingredient.name));
+      list.append(node("li", "", displayFoodAmount(item[1] * servings) + " " + ingredient.name));
     });
     return list;
   }
@@ -1376,7 +1602,7 @@
     });
 
     summary.groceries.forEach(function (entry) {
-      groceryList.append(node("li", "", formatAmount(entry[1]) + " g " + NUTRITION_INGREDIENTS[entry[0]].name));
+      groceryList.append(node("li", "", displayFoodAmount(entry[1]) + " " + NUTRITION_INGREDIENTS[entry[0]].name));
     });
     if (!summary.groceries.length) groceryList.append(node("li", "grocery-empty", "Your grocery list will appear when you add a meal."));
   }
@@ -1419,6 +1645,7 @@
     const phase = document.getElementById("meal-day").value;
     if (MEAL_PLAN_CATEGORIES[phase]) {
       state.nutritionPhase = phase;
+      state.nutritionPlan = [];
       state.nutritionMeals = null;
       document.getElementById("nutrition-phase").value = phase;
       saveState();
@@ -1559,8 +1786,27 @@
   const nutritionPhase = document.getElementById("nutrition-phase");
   nutritionPhase.value = state.nutritionPhase;
   document.getElementById("meal-day").value = state.nutritionPhase;
+  loadNutritionForm();
+  const nutritionProfileForm = document.getElementById("nutrition-profile-form");
+  nutritionProfileForm.addEventListener("submit", function (event) { event.preventDefault(); });
+  nutritionProfileForm.addEventListener("input", function (event) {
+    if (["nutrition-age", "nutrition-height", "nutrition-weight"].includes(event.target.id)) updateNutritionProfile();
+  });
+  nutritionProfileForm.addEventListener("change", function (event) {
+    if (event.target.id !== "nutrition-units") updateNutritionProfile();
+  });
+  const nutritionUnits = document.getElementById("nutrition-units");
+  let displayedNutritionUnits = nutritionUnits.value;
+  nutritionUnits.addEventListener("change", function () {
+    const nextUnits = nutritionUnits.value;
+    convertNutritionMeasurements(displayedNutritionUnits, nextUnits);
+    displayedNutritionUnits = nextUnits;
+    setNutritionMeasurementUnits(nextUnits);
+    updateNutritionProfile();
+  });
   nutritionPhase.addEventListener("change", function () {
     state.nutritionPhase = nutritionPhase.value;
+    state.nutritionPlan = [];
     state.nutritionMeals = null;
     document.getElementById("meal-day").value = state.nutritionPhase;
     saveState();

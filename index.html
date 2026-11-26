@@ -337,8 +337,8 @@
       <div class="page-intro"><p class="eyebrow"><span class="eyebrow-line"></span> NOURISHMENT WITHOUT THE RULEBOOK</p><h1>Eat well. <span>Feel good.</span></h1><p class="welcome-copy">Flexible meal ideas, simple food swaps, and helpful basics—because eating well should fit real life.</p></div>
       <section class="nutrition-planner" aria-labelledby="nutrition-planner-heading">
         <div class="section-heading">
-          <div><p class="eyebrow">ILLUSTRATIVE DAILY TARGETS</p><h2 id="nutrition-planner-heading">Meal plan</h2></div>
-          <label class="nutrition-phase">Phase
+          <div><p class="eyebrow">PERSONALIZED DAILY TARGETS</p><h2 id="nutrition-planner-heading">Meal plan</h2></div>
+          <label class="nutrition-phase">Fitness goal
             <select id="nutrition-phase">
               <option value="maintain">Maintain</option>
               <option value="cut">Cutting</option>
@@ -346,11 +346,56 @@
             </select>
           </label>
         </div>
-        <p class="estimate-note">Daily targets are illustrative estimates, not personal prescriptions. Recipe nutrition below is calculated from generic ingredient data and measured portions; brands and preparation change the result.</p>
+        <p class="estimate-note">Enter your details for estimated BMR, TDEE, nutrition targets, and a meal plan built from the recipe library. Estimates are for healthy adults, not medical advice; individual needs vary.</p>
+        <form id="nutrition-profile-form" class="nutrition-profile-form" aria-label="Personalize nutrition targets">
+          <div class="nutrition-profile-heading">
+            <h3>Your details</h3>
+            <label>Units
+              <select id="nutrition-units" name="units">
+                <option value="metric">Metric</option>
+                <option value="imperial">Imperial</option>
+              </select>
+            </label>
+          </div>
+          <div class="nutrition-profile-grid">
+            <label>Age (18+)
+              <input id="nutrition-age" name="age" type="number" min="18" max="100" step="1" inputmode="numeric" required>
+            </label>
+            <label>Height (<span id="nutrition-height-unit">cm</span>)
+              <input id="nutrition-height" name="height" type="number" min="120" max="230" step="0.1" inputmode="decimal" required>
+            </label>
+            <label>Weight (<span id="nutrition-weight-unit">kg</span>)
+              <input id="nutrition-weight" name="weight" type="number" min="35" max="300" step="0.1" inputmode="decimal" required>
+            </label>
+            <label>Sex for BMR equation
+              <select id="nutrition-sex" name="sex" required>
+                <option value="">Choose</option>
+                <option value="female">Female</option>
+                <option value="male">Male</option>
+              </select>
+            </label>
+            <label>Activity level
+              <select id="nutrition-activity" name="activity" required>
+                <option value="">Choose</option>
+                <option value="sedentary">Mostly sedentary</option>
+                <option value="light">Lightly active</option>
+                <option value="moderate">Moderately active</option>
+                <option value="very-active">Very active</option>
+                <option value="extra-active">Extra active</option>
+              </select>
+            </label>
+          </div>
+          <p class="nutrition-profile-note">BMR uses the Mifflin–St Jeor equation; sex selection is used only in that estimate. You can change units at any time; measurements convert automatically. Your profile is saved in this browser only.</p>
+        </form>
+        <p id="nutrition-bmr-summary" class="nutrition-bmr-summary" aria-live="polite"></p>
         <p class="calorie-balance-note"><strong>Weight change:</strong> overall energy intake relative to energy used over time is the main driver of weight change; no single food or meal determines it.</p>
         <p class="nutrition-source-note">Recipe estimates use representative generic food-composition values per 100 g; see <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer">USDA FoodData Central</a>. Values are rounded and can vary by brand, cut, and preparation.</p>
         <div id="nutrition-targets" class="nutrition-targets"></div>
         <div id="daily-meals" class="daily-meals"></div>
+        <section id="nutrition-plan-totals" class="nutrition-plan-totals" aria-labelledby="nutrition-plan-totals-heading" hidden>
+          <h3 id="nutrition-plan-totals-heading">Planned daily totals vs. targets</h3>
+          <div id="daily-meal-totals" class="nutrition-targets"></div>
+        </section>
       </section>
       <section class="workout-nutrition" aria-labelledby="workout-nutrition-heading">
         <div class="section-heading">

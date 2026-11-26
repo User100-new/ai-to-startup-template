@@ -284,6 +284,17 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .cardio-list li::before { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #82a9d8; content: ""; }
 .cardio-list li:hover { border-color: #52749b; background: #182638; }
 .nutrition-planner,.food-library { margin-top: 40px; padding: 22px; border: 1px solid #29394b; border-radius: 9px; background: #111824; }
+.nutrition-profile-form { margin: 14px 0; padding: 14px; border: 1px solid #29394b; border-radius: 7px; background: #151f2d; }
+.nutrition-profile-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.nutrition-profile-heading h3 { margin: 0; font-size: 13px; }
+.nutrition-profile-heading label,.nutrition-profile-grid label { display: grid; gap: 5px; color: #b2bfd0; font-size: 10px; font-weight: 600; }
+.nutrition-profile-heading select,.nutrition-profile-grid input,.nutrition-profile-grid select { width: 100%; min-height: 38px; padding: 7px 9px; border: 1px solid #34475e; border-radius: 5px; color: #dde7f4; background: #111924; font-size: 11px; }
+.nutrition-profile-heading select { min-width: 115px; }
+.nutrition-profile-grid { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 10px; }
+.nutrition-profile-note { margin: 10px 0 0; color: #96a5b7; font-size: 9px; line-height: 1.6; }
+.nutrition-bmr-summary { margin: 0 0 12px; color: #c1d2e7; font-size: 10px; line-height: 1.7; }
+.nutrition-plan-totals { margin-top: 20px; }
+.nutrition-plan-totals h3 { margin: 0 0 10px; font-size: 13px; }
 .workout-nutrition { margin-top: 40px; padding: 22px; border: 1px solid #29394b; border-radius: 9px; background: #111824; }
 .timed-meal-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
 .timed-meal { padding: 14px; border: 1px solid #29394b; border-radius: 7px; background: #151f2d; }
@@ -304,7 +315,10 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .daily-meal h3 { margin: 6px 0 3px; font-size: 13px; }
 .meal-portion { margin: 0; color: #98a8ba; font-size: 9px; }
 .meal-macro { margin: 10px 0; color: #c1d2e7; font-size: 9px; line-height: 1.7; }
-.meal-replace { margin-top: auto; padding: 6px 8px; border: 1px solid #3a4b60; border-radius: 4px; color: #bdd1e9; background: #192536; cursor: pointer; font-size: 9px; }
+.daily-meal-ingredients { margin: 0 0 10px; padding-top: 7px; border-top: 1px solid #263445; }
+.daily-meal-ingredients summary { color: #bdd1e9; cursor: pointer; font-size: 9px; }
+.daily-meal-ingredients .recipe-ingredients-list { grid-template-columns: 1fr; margin-top: 7px; }
+.meal-replace { margin-top: auto; padding: 7px 8px; border: 1px solid #3a4b60; border-radius: 4px; color: #bdd1e9; background: #192536; cursor: pointer; font-size: 9px; }
 .food-search { width: min(280px,100%); min-height: 38px; padding: 8px 10px; border: 1px solid #34475e; border-radius: 5px; color: #dde7f4; background: #111924; font-size: 10px; }
 .food-compare-controls { display: flex; gap: 10px; margin-bottom: 10px; }
 .food-compare-controls label { display: flex; align-items: center; gap: 8px; color: #a5b4c6; font-size: 10px; }
@@ -517,6 +531,7 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
   .grocery-list { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .goal-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .profile-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .nutrition-profile-grid { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .weekly-plan { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .anatomy-layout { grid-template-columns: 1fr; }
   .nutrition-targets { grid-template-columns: repeat(2,minmax(0,1fr)); }
@@ -560,6 +575,7 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
   .fitness-onboarding { padding: 18px 14px; }
   .onboarding-heading { align-items: flex-start; flex-direction: column; }
   .profile-grid { grid-template-columns: 1fr; }
+  .nutrition-profile-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .choice-row { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
   .choice-row label { min-height: 36px; }
   .weekly-plan { grid-template-columns: 1fr; }
