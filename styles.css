@@ -252,6 +252,17 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .muscle-exercise strong { font-size: 11px; }
 .muscle-prescription { color: #b7cbe7; font-size: 9px; font-weight: 650; }
 .muscle-exercise p { margin: 2px 0 0; color: #96a5b7; font-size: 9px; line-height: 1.55; }
+.exercise-tutorial,.recipe-tutorial { width: 100%; min-height: 34px; margin-top: 6px; font-size: 9px; text-decoration: none; }
+.exercise-learning { min-width: 0; margin-top: 5px; padding-top: 6px; border-top: 1px solid #263445; }
+.exercise-learning summary { color: #bdd1e9; cursor: pointer; font-size: 9px; font-weight: 600; }
+.exercise-detail-section { margin-top: 8px; }
+.exercise-detail-section>strong { display: block; color: #cdd9e7; font-size: 9px; }
+.exercise-detail-section p,.exercise-step-list { margin: 3px 0 0; color: #96a5b7; font-size: 9px; line-height: 1.6; }
+.exercise-step-list { padding-left: 18px; }
+.exercise-tutorial-link { color: #bdd1e9; font-size: 9px; text-decoration: underline; text-underline-offset: 2px; }
+.cardio-list .cardio-exercise { display: grid; align-items: start; gap: 7px; }
+.cardio-learning { grid-column: 1/-1; width: 100%; }
+.cardio-learning .exercise-detail-section { white-space: normal; }
 .workout-photo { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; object-fit: cover; filter: saturate(.92) contrast(1.02); }
 .cardio-planner { margin: 34px 0 40px; padding: 20px; border: 1px solid #29394b; border-radius: 9px; background: #111824; }
 .cardio-day-label { display: flex; align-items: center; gap: 8px; color: #a5b4c6; font-size: 10px; }
@@ -360,6 +371,7 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .recipe-card-content { display: flex; flex-direction: column; gap: 11px; padding: 13px; }
 .recipe-card-heading .eyebrow { margin: 0 0 5px; text-transform: capitalize; }
 .recipe-card-heading h3 { margin: 0; font-size: 14px; line-height: 1.4; }
+.recipe-meta { margin: -4px 0 0; color: #aab8c8; font-size: 9px; line-height: 1.6; }
 .recipe-nutrition { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 4px; }
 .recipe-nutrition-item { display: grid; gap: 3px; padding: 6px 4px; border-radius: 4px; background: #192536; }
 .recipe-nutrition-item span { color: #91a2b5; font-size: 8px; }
@@ -372,6 +384,8 @@ h1>span,.hero-copy h2>span,.nutrition-highlight h2>span { color: #98bdf1; font-f
 .recipe-detail-section { margin-top: 10px; }
 .recipe-detail-section h4 { margin: 0 0 4px; color: #cdd9e7; font-size: 9px; }
 .recipe-detail-section p { margin: 0; color: #98a8ba; font-size: 9px; line-height: 1.6; }
+.recipe-step-list { display: grid; gap: 5px; margin: 0; padding-left: 18px; color: #98a8ba; font-size: 9px; line-height: 1.6; }
+.recipe-detail-section h4:not(:first-child) { margin-top: 10px; }
 .recipe-ingredients-list { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 4px 9px; margin: 0; padding-left: 14px; color: #98a8ba; font-size: 9px; line-height: 1.5; }
 .recipe-allergen-note { padding: 8px; border-radius: 4px; background: #202b39; }
 .recipe-actions { display: flex; align-items: center; gap: 8px; margin-top: auto; }

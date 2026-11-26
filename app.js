@@ -246,6 +246,9 @@
           : "Equipment: " + (exerciseEquipment.length ? exerciseEquipment.join(" + ") : "Bodyweight / none");
         const equipment = node("span", "exercise-equipment", equipmentLabel);
         const instructions = node("p", "exercise-instructions", exercise.instructions);
+        const exerciseGroupKey = Object.keys(MUSCLE_WORKOUTS).find(function (key) {
+          return MUSCLE_WORKOUTS[key].label === exercise.groups;
+        }) || "core";
         const availableEquipment = state.profile ? normalizeEquipment(state.profile.equipment) : ["None"];
         const levelRank = { beginner: 0, intermediate: 1, advanced: 2 };
         const availableLevel = levelRank[state.profile && state.profile.experience] || 0;
@@ -267,6 +270,7 @@
           }
         });
         row.append(prescription, equipment, instructions);
+        appendExerciseLearning(row, exercise, exerciseGroupKey);
         if (!exercise.isCardio) row.append(substitute);
         card.append(row);
       });
@@ -348,6 +352,119 @@
     });
   });
 
+  const MUSCLE_SECONDARIES = {
+    chest: "front deltoids, triceps, and serratus anterior",
+    back: "biceps, rear deltoids, and forearms",
+    shoulders: "triceps and upper chest",
+    biceps: "brachialis and forearm flexors",
+    triceps: "shoulders and chest (depending on the movement)",
+    forearms: "finger flexors, wrist extensors, and upper back",
+    trapezius: "forearms and rear deltoids",
+    quadriceps: "glutes, hamstrings, and core",
+    hamstrings: "glutes, calves, and spinal erectors",
+    glutes: "hamstrings, quadriceps, and core",
+    calves: "soleus, gastrocnemius, and foot stabilizers",
+    "hip-adductors-abductors": "glutes, inner thighs, and core",
+    core: "hip flexors, obliques, and spinal stabilizers"
+  };
+
+  function exerciseFormGuidance(exercise, groupKey) {
+    const name = exercise.name.toLowerCase();
+    const isTimed = /plank|hang|carry|walk|hold|pinch/i.test(name);
+    const isUnilateral = /single-arm|single-leg|one-arm|one-leg|lunge|step-up|bulgarian|copenhagen|kickback|woodchopper|wrist curl/i.test(name);
+    let movement;
+    if (/squat|lunge|step-up|leg press|sissy/i.test(name)) {
+      movement = {
+        steps: ["Set your feet in a stable, comfortable stance and brace your trunk.", "Bend your hips and knees under control, keeping your knees tracking in line with your toes.", "Lower only as far as you can maintain balance and a neutral spine.", "Push through the whole foot to return to standing; repeat smoothly."],
+        mistakes: "Letting the knees collapse inward, heels lift, or lower back round. Reduce the load or range, slow down, and keep knees tracking over the toes."
+      };
+    } else if (/deadlift|hinge|good morning|romanian|rack pull/i.test(name)) {
+      movement = {
+        steps: ["Stand with feet about hip-width apart and soften your knees.", "Brace your abdomen and push your hips back while keeping the weight close to your legs.", "Lower only until you feel a hamstring stretch without rounding your back.", "Drive your hips forward to stand tall; avoid leaning backward at the top."],
+        mistakes: "Rounding the back, letting the weight drift away, or turning the hinge into a squat. Use a lighter load and keep the weight close."
+      };
+    } else if (/row|pulldown|pull-up|chin-up|pull over|pullover/i.test(name)) {
+      movement = {
+        steps: ["Set a stable stance or seated position and brace your trunk.", "Begin with shoulders relaxed away from your ears.", "Pull by driving your elbows toward your sides, without jerking or swinging.", "Pause briefly, then return the load slowly until your arms are comfortably extended."],
+        mistakes: "Using momentum, shrugging, or overextending the lower back. Reduce the load and move through a controlled, comfortable range."
+      };
+    } else if (/press|push-up|dip|pushdown|extension|skull crusher/i.test(name)) {
+      movement = {
+        steps: ["Set your feet or body securely and brace your abdomen.", "Position wrists comfortably in line with the working joints.", "Press or extend smoothly while keeping shoulders controlled and avoiding a hard lockout.", "Lower under control to the starting position and repeat."],
+        mistakes: "Flaring elbows excessively, arching the back, or bouncing at the bottom. Use a manageable load and keep the motion smooth."
+      };
+    } else if (/curl|raise|fly|face pull|shrug|wrist roller/i.test(name)) {
+      movement = {
+        steps: ["Stand or sit tall and stabilize your torso.", "Keep the working joint aligned and begin with a comfortable range of motion.", "Raise, curl, or draw the resistance smoothly without swinging.", "Pause briefly, then lower slowly to the starting position."],
+        mistakes: "Swinging the torso, rushing the lowering phase, or using a range that causes discomfort. Reduce the load and keep the movement controlled."
+      };
+    } else if (/plank|dead bug|crunch|sit-up|leg raise|knee raise|rollout|woodchopper|pallof|twist|bicycle/i.test(name)) {
+      movement = {
+        steps: ["Set a comfortable position and gently brace your trunk.", "Keep your ribs stacked over your pelvis and breathe steadily.", "Move only through a range where you can control your torso and pelvis.", "Return slowly to the start; stop the set when you can no longer maintain control."],
+        mistakes: "Holding your breath, pulling on your neck, or letting your lower back arch. Shorten the range and exhale through the effort."
+      };
+    } else {
+      movement = {
+        steps: ["Set up in a stable position with the required equipment secured.", "Brace gently and align the working joints comfortably.", "Move through a controlled, pain-free range without using momentum.", "Return slowly to the start and repeat with consistent technique."],
+        mistakes: "Rushing repetitions, using momentum, or forcing a painful range. Reduce the load or range and stop if pain persists."
+      };
+    }
+
+    const group = MUSCLE_WORKOUTS[groupKey];
+    const primary = group ? group.label : exercise.groups;
+    const alternatives = group
+      ? group.exercises.filter(function (item) { return item !== exercise.name; }).slice(0, 3)
+      : [];
+    const compound = /squat|deadlift|press|row|pull-up|chin-up|lunge|hip thrust|dip/i.test(name);
+    return {
+      primary: primary,
+      secondary: MUSCLE_SECONDARIES[groupKey] || "nearby stabilizing muscles",
+      equipment: exercise.equipment && exercise.equipment.length ? exercise.equipment.join(", ") : "Bodyweight / none",
+      dosage: isTimed ? "3 sets × 20–40 seconds" : "3 sets × " + (isUnilateral ? "8–12 reps per side" : compound ? "6–12 reps" : "10–15 reps"),
+      rest: compound ? "90–120 seconds between sets" : "60–90 seconds between sets",
+      steps: movement.steps,
+      mistakes: movement.mistakes,
+      alternatives: alternatives.length ? alternatives.join("; ") : "Choose another comfortable movement for the same muscle group.",
+      video: "https://www.youtube.com/results?search_query=" + encodeURIComponent(exercise.name + " exercise proper form tutorial")
+    };
+  }
+
+  function appendExerciseLearning(parent, exercise, groupKey) {
+    const guidance = exerciseFormGuidance(exercise, groupKey);
+    const link = node("a", "button button-outline exercise-tutorial", "Watch Exercise Tutorial");
+    link.href = guidance.video;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+
+    const details = node("details", "exercise-learning");
+    details.append(node("summary", "", "Form, muscles & training details"));
+    [
+      ["Primary muscles", guidance.primary],
+      ["Secondary muscles", guidance.secondary],
+      ["Equipment", guidance.equipment],
+      ["Recommended sets & reps", guidance.dosage],
+      ["Rest", guidance.rest]
+    ].forEach(function (item) {
+      const section = node("div", "exercise-detail-section");
+      section.append(node("strong", "", item[0]), node("p", "", item[1]));
+      details.append(section);
+    });
+    const steps = node("ol", "exercise-step-list");
+    guidance.steps.forEach(function (step) { steps.append(node("li", "", step)); });
+    const stepsSection = node("div", "exercise-detail-section");
+    stepsSection.append(node("strong", "", "Step-by-step instructions"), steps);
+    details.append(stepsSection);
+    [
+      ["Common mistakes & how to avoid them", guidance.mistakes],
+      ["Same-muscle alternatives", guidance.alternatives]
+    ].forEach(function (item) {
+      const section = node("div", "exercise-detail-section");
+      section.append(node("strong", "", item[0]), node("p", "", item[1]));
+      details.append(section);
+    });
+    parent.append(link, details);
+  }
+
   function renderMuscleMuscle(muscle) {
     const results = document.getElementById("muscle-results");
     if (!results) return;
@@ -363,6 +480,8 @@
     group.exercises.forEach(function (exercise) {
       const card = node("article","muscle-exercise");
       card.append(node("strong","",exercise));
+      const definition = EXERCISES.find(function (item) { return item.name === exercise; });
+      if (definition) appendExerciseLearning(card, definition, groupKey);
       results.append(card);
     });
   }
@@ -418,7 +537,33 @@
       heading.append(title, node("span", "cardio-category-count", group.exercises.length + " options"));
       const list = node("ul", "cardio-list");
       group.exercises.forEach(function (exercise) {
-        list.append(node("li", "", exercise));
+        const item = node("li", "cardio-exercise");
+        item.append(node("span", "", exercise));
+        const tutorial = node("a", "exercise-tutorial-link", "Watch Exercise Tutorial");
+        tutorial.href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(exercise + " cardio exercise technique tutorial");
+        tutorial.target = "_blank";
+        tutorial.rel = "noopener noreferrer";
+        item.append(tutorial);
+        const details = node("details", "exercise-learning cardio-learning");
+        details.append(node("summary", "", "Muscles, pacing & technique"));
+        [
+          ["Primary muscles", "Legs and cardiovascular system; emphasis varies by activity."],
+          ["Secondary muscles", "Core and upper body contribute to posture and stabilization."],
+          ["Equipment", /outdoor|hiking|walking|running|cycling|swimming|dance/i.test(exercise) ? "Comfortable activity-appropriate clothing; equipment varies." : "Activity-specific machine or equipment."],
+          ["Recommended dose", group.category.includes("HIIT")
+            ? "Begin with 4–8 intervals of 20–30 seconds of brisk effort followed by 60–90 seconds easy; build gradually and include a warm-up."
+            : "Start with 20–40 minutes at a pace that lets you maintain control; adjust duration and intensity to your fitness."],
+          ["Rest", "Take recovery as needed; alternate harder sessions with easy activity or rest."],
+          ["Step-by-step technique", "Begin with 5 minutes easy to warm up. Set a sustainable pace and maintain relaxed, controlled movement. Ease down for the final 3–5 minutes, then rest or stretch gently."],
+          ["Common mistakes & how to avoid them", "Starting too fast, skipping a gradual warm-up, or ignoring discomfort. Build duration and intensity gradually and stop for pain, dizziness, or unusual shortness of breath."],
+          ["Alternatives", "Choose another low-impact or moderate activity from this list that feels comfortable."]
+        ].forEach(function (detail) {
+          const section = node("div", "exercise-detail-section");
+          section.append(node("strong", "", detail[0]), node("p", "", detail[1]));
+          details.append(section);
+        });
+        item.append(details);
+        list.append(item);
       });
       section.append(heading, list);
       container.append(section);
@@ -881,6 +1026,73 @@
     return String(Math.round(value * 10) / 10).replace(/\.0$/, "");
   }
 
+  const ESTIMATED_COST_PER_GRAM = {
+    greekYogurt: 0.012, blueberries: 0.018, chiaSeeds: 0.025, eggs: 0.016,
+    eggWhites: 0.018, spinach: 0.012, mushrooms: 0.012, bellPepper: 0.01,
+    oats: 0.006, proteinPowder: 0.035, strawberries: 0.015, cottageCheese: 0.012,
+    raspberries: 0.02, wholeGrainWrap: 0.009, chickenBreast: 0.018,
+    lettuce: 0.008, cucumber: 0.007, tomato: 0.009, tuna: 0.018,
+    brownRice: 0.005, avocado: 0.016, turkey: 0.02, quinoa: 0.012,
+    broccoli: 0.009, shrimp: 0.03, mixedGreens: 0.015, lemon: 0.008,
+    salmon: 0.035, asparagus: 0.02, leanBeef: 0.03, sweetPotato: 0.007,
+    greenBeans: 0.01, groundTurkey: 0.02, tomatoSauce: 0.006, zucchini: 0.009,
+    cod: 0.025, cauliflower: 0.008, carrot: 0.006, apple: 0.006, hummus: 0.012,
+    almondMilk: 0.004, peanutButter: 0.012, banana: 0.004, wholeGrainBread: 0.008,
+    potato: 0.004, cheddar: 0.018, tortilla: 0.008, granola: 0.012, milk: 0.003,
+    almonds: 0.02, cashews: 0.022, raisins: 0.01, darkChocolate: 0.025,
+    pasta: 0.006, pesto: 0.025, coconutMilk: 0.008, parmesan: 0.025,
+    chickpeas: 0.006, oliveOil: 0.012, cornTortilla: 0.006, salsa: 0.008,
+    almondButter: 0.018, walnuts: 0.022, orange: 0.006, riceCake: 0.01,
+    cinnamon: 0.025, blackPepper: 0.025, honey: 0.01, feta: 0.018, olives: 0.02
+  };
+
+  function recipeCookingProfile(meal) {
+    const title = meal.title.toLowerCase();
+    const text = (meal.title + " " + meal.preparation).toLowerCase();
+    const noCook = /overnight|salad|wrap|smoothie|bowl|parfait|trail mix|rice cake|hummus|yogurt|apple and|nuts and|snack/i.test(title);
+    const prepMinutes = /snack|smoothie|trail mix|rice cake/i.test(title) ? 5 : /breakfast|oatmeal|oats|egg/i.test(title) ? 8 : 12;
+    let cookMinutes = 0;
+    if (!noCook) {
+      if (/roast|bake|stuffed|sweet potato/i.test(text)) cookMinutes = 25;
+      else if (/pancake|omelette|omelet|scrambl|skillet|oatmeal|egg/i.test(text)) cookMinutes = 10;
+      else if (/stir-fry|stir fry|curry|meatball|pasta|grill|sear|pan-cook/i.test(text)) cookMinutes = 18;
+      else cookMinutes = 12;
+    }
+    const estimatedCost = meal.ingredients.reduce(function (total, ingredient) {
+      return total + ingredient[1] * (ESTIMATED_COST_PER_GRAM[ingredient[0]] || 0.012);
+    }, 0);
+    return {
+      prep: prepMinutes,
+      cook: cookMinutes,
+      cost: Math.max(0.5, estimatedCost),
+      servings: "1 serving (" + meal.portion + ")"
+    };
+  }
+
+  function recipeDirections(meal) {
+    const directions = meal.preparation.split(/;\s+|\.\s+/).map(function (step) {
+      return step.trim().replace(/[.!?]+$/, "");
+    }).filter(Boolean);
+    const steps = ["Measure the ingredients; rinse and chop any fresh produce."].concat(directions);
+    if (directions.length < 2) steps.push("Taste, adjust seasoning if desired, and serve.");
+    return steps;
+  }
+
+  function recipeDietaryAlternatives(meal) {
+    const ingredients = meal.ingredients.map(function (item) { return NUTRITION_INGREDIENTS[item[0]]; });
+    const animalFoods = ingredients.filter(function (ingredient) { return ingredient.animal && ingredient.animal !== "honey"; });
+    const dairyFoods = ingredients.filter(function (ingredient) { return ingredient.animal === "dairy"; });
+    const alternatives = [];
+    if (animalFoods.length) {
+      alternatives.push("Plant-based: replace " + animalFoods.map(function (item) { return item.name.toLowerCase(); }).join(", ") + " with firm tofu, tempeh, or beans; choose a plant-based protein powder or yogurt where relevant.");
+    } else {
+      alternatives.push("This ingredient list is plant-based; check packaged ingredients for milk, egg, or other allergens.");
+    }
+    if (dairyFoods.length) alternatives.push("Dairy-free: use unsweetened fortified soy yogurt or milk, or a suitable dairy-free cheese in place of dairy ingredients.");
+    if (ingredients.some(function (item) { return item.gluten; })) alternatives.push("Gluten-free: choose certified gluten-free oats, bread, pasta, or wraps as appropriate; verify package labels.");
+    return alternatives.join(" ");
+  }
+
   function recipeIngredientsList(meal, servings) {
     const list = node("ul", "recipe-ingredients-list");
     meal.ingredients.forEach(function (item) {
@@ -892,7 +1104,10 @@
 
   function updateRecipeCard(card, meal, servings) {
     const nutrition = calculateMealNutrition(meal, servings);
+    const cooking = recipeCookingProfile(meal);
     card.querySelector("[data-recipe-servings]").textContent = formatAmount(servings) + " × " + meal.portion;
+    const meta = card.querySelector("[data-recipe-meta]");
+    if (meta) meta.textContent = formatAmount(servings) + " × " + meal.portion + " · Prep " + cooking.prep + " min · Cook " + cooking.cook + " min · Est. $" + cooking.cost.toFixed(2) + " / serving";
     card.querySelector("[data-recipe-ingredients]").replaceChildren(recipeIngredientsList(meal, servings));
     [
       ["calories", Math.round(nutrition.calories) + " kcal"],
@@ -941,6 +1156,15 @@
     const heading = node("div", "recipe-card-heading");
     heading.append(node("span", "eyebrow", meal.type), node("h3", "", meal.title));
     content.append(heading);
+    const cooking = recipeCookingProfile(meal);
+    const recipeMeta = node("p", "recipe-meta", cooking.servings + " · Prep " + cooking.prep + " min · Cook " + cooking.cook + " min · Est. $" + cooking.cost.toFixed(2) + " / serving");
+    recipeMeta.dataset.recipeMeta = "true";
+    content.append(recipeMeta);
+    const tutorial = node("a", "button button-outline recipe-tutorial", "Watch Cooking Tutorial");
+    tutorial.href = "https://www.youtube.com/results?search_query=" + encodeURIComponent(meal.title + " cooking tutorial recipe");
+    tutorial.target = "_blank";
+    tutorial.rel = "noopener noreferrer";
+    content.append(tutorial);
 
     const nutrition = node("div", "recipe-nutrition");
     nutrition.setAttribute("aria-live", "polite");
@@ -972,7 +1196,7 @@
     content.append(portion);
 
     const details = node("details", "recipe-details");
-    details.append(node("summary", "", "Ingredients, preparation & nutrition notes"));
+    details.append(node("summary", "", "Ingredients, cooking steps & meal-prep notes"));
     const ingredientSection = node("div", "recipe-detail-section");
     ingredientSection.append(node("h4", "", "Ingredients for this portion"));
     const ingredientList = node("div", "recipe-ingredients-container");
@@ -980,7 +1204,7 @@
     ingredientSection.append(ingredientList);
     details.append(ingredientSection);
     [
-      ["Preparation", meal.preparation],
+      ["Preparation notes", meal.preparation],
       ["Health benefits", meal.benefits],
       ["Vitamins", mealMicronutrients(meal, "vitamins")],
       ["Minerals", mealMicronutrients(meal, "minerals")]
@@ -989,6 +1213,11 @@
       section.append(node("h4", "", item[0]), node("p", "", item[1]));
       details.append(section);
     });
+    const directions = node("ol", "recipe-step-list");
+    recipeDirections(meal).forEach(function (step) { directions.append(node("li", "", step)); });
+    const directionsSection = node("div", "recipe-detail-section");
+    directionsSection.append(node("h4", "", "Step-by-step cooking directions"), directions);
+    details.append(directionsSection);
     const allergens = mealAllergenInfo(meal);
     const allergenSection = node("div", "recipe-detail-section recipe-allergen-note");
     allergenSection.append(node("h4", "", "Allergen information"), node("p", "", allergens.contains + (allergens.mayContain ? " May contain: " + allergens.mayContain.trim() + "." : "") + " Check product labels and cross-contact risks."));
@@ -997,8 +1226,22 @@
       return NUTRITION_INGREDIENTS[item[0]].swaps || [];
     }))).slice(0, 5);
     const alternativeSection = node("div", "recipe-detail-section");
-    alternativeSection.append(node("h4", "", "Ingredient alternatives"), node("p", "", alternatives.join("; ") + "."));
+    alternativeSection.append(
+      node("h4", "", "Healthy ingredient substitutions"),
+      node("p", "", alternatives.join("; ") + "."),
+      node("h4", "", "Dietary alternatives"),
+      node("p", "", recipeDietaryAlternatives(meal))
+    );
     details.append(alternativeSection);
+    const storageSection = node("div", "recipe-detail-section");
+    const storageAdvice = /rice/i.test(meal.title + " " + meal.ingredients.map(function (item) { return NUTRITION_INGREDIENTS[item[0]].name; }).join(" "))
+      ? "Meal prep: cook grains and proteins ahead, keep components separate, and refrigerate cooked rice promptly; use within 1 day. Store other leftovers in a covered container at 4°C/40°F or colder and use within 3–4 days. Reheat leftovers to 74°C/165°F."
+      : "Meal prep: wash and chop produce ahead and portion ingredients separately. Refrigerate perishable food within 2 hours in a covered container at 4°C/40°F or colder; use cooked leftovers within 3–4 days. Reheat leftovers to 74°C/165°F.";
+    storageSection.append(
+      node("h4", "", "Meal prep & storage"),
+      node("p", "", storageAdvice + " Estimated cost is a rough US grocery estimate and varies by location, brand, and season.")
+    );
+    details.append(storageSection);
     content.append(details);
 
     const actions = node("div", "recipe-actions");
