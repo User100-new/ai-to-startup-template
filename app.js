@@ -687,7 +687,17 @@
     tofu: "assets/foods/vegetable-and-bean-salad.jpg",
     hummus: "assets/foods/fresh-vegetables.jpg",
     peanutOats: "assets/foods/oatmeal-bowl.jpg",
-    bananaPeanutButter: "assets/foods/peanut-butter-banana-toast.jpg"
+    bananaPeanutButter: "assets/foods/peanut-butter-banana-toast.jpg",
+    omelette: "assets/foods/omelette.jpg",
+    tunaRiceBowl: "assets/foods/tuna-rice-bowl.jpg",
+    tunaSalad: "assets/foods/tuna-salad.jpg",
+    cottageCheese: "assets/foods/cottage-cheese-bowl.jpg",
+    smoothie: "assets/foods/smoothie.jpg",
+    greenSmoothie: "assets/foods/green-smoothie.jpg",
+    avocadoEggToast: "assets/foods/avocado-egg-toast.jpg",
+    pancakes: "assets/foods/pancakes.jpg",
+    breakfastBurrito: "assets/foods/breakfast-burrito.jpg",
+    beefPotatoBowl: "assets/foods/beef-potato-bowl.jpg"
   };
   const FOOD_PHOTO_ALTS = {
     oats: "Bowl of oatmeal topped with berries.",
@@ -711,7 +721,17 @@
     tofu: "Photograph of a vegetable and bean salad.",
     hummus: "Photograph of fresh vegetables served with a dip.",
     peanutOats: "Photograph of oatmeal topped with berries.",
-    bananaPeanutButter: "Photograph of toast topped with peanut butter and banana."
+    bananaPeanutButter: "Photograph of toast topped with peanut butter and banana.",
+    omelette: "Plain folded omelette served on a plate.",
+    tunaRiceBowl: "Sliced tuna served over rice in a bowl.",
+    tunaSalad: "Tuna salad with vegetables.",
+    cottageCheese: "Bowl of cottage cheese.",
+    smoothie: "Green kiwi smoothie.",
+    greenSmoothie: "Green fruit smoothie.",
+    avocadoEggToast: "Toast topped with avocado and egg.",
+    pancakes: "Stack of pancakes topped with syrup and walnuts.",
+    breakfastBurrito: "Breakfast burrito filled with eggs and vegetables.",
+    beefPotatoBowl: "Ground beef and potatoes served with peas."
   };
 
   function foodImage(kind, alt, className) {
@@ -941,7 +961,71 @@
     }
   }
 
+  const MEAL_PHOTO_OVERRIDES = {
+    "cut-yogurt-blueberry-bowl": "dairy",
+    "cut-vegetable-omelette": "omelette",
+    "cut-protein-oatmeal": "oats",
+    "cut-cottage-raspberry-bowl": "cottageCheese",
+    "cut-egg-white-wrap": "breakfastBurrito",
+    "cut-grilled-chicken-salad": "chickenLunch",
+    "cut-tuna-rice-bowl": "tunaRiceBowl",
+    "cut-turkey-lettuce-wraps": "wrap",
+    "cut-chicken-quinoa-bowl": "chickenLunch",
+    "cut-shrimp-salad": "tunaSalad",
+    "cut-salmon-roast-vegetables": "chickenDinner",
+    "cut-lean-beef-stir-fry": "beefPotatoBowl",
+    "cut-chicken-sweet-potato": "chickenDinner",
+    "cut-turkey-meatballs": "chickenDinner",
+    "cut-cod-vegetables": "tunaSalad",
+    "cut-apple-yogurt": "dairy",
+    "cut-boiled-eggs": "egg",
+    "cut-protein-smoothie": "smoothie",
+    "cut-vegetables-hummus": "hummus",
+    "cut-cottage-berries": "cottageCheese",
+    "bulk-peanut-protein-oats": "oats",
+    "bulk-eggs-avocado-toast": "avocadoEggToast",
+    "bulk-high-protein-pancakes": "pancakes",
+    "bulk-breakfast-burrito": "breakfastBurrito",
+    "bulk-smoothie-bowl": "greenSmoothie",
+    "bulk-chicken-rice-bowl": "chickenLunch",
+    "bulk-beef-potato-bowl": "beefPotatoBowl",
+    "bulk-chicken-pesto-pasta": "pasta",
+    "bulk-salmon-quinoa-bowl": "tunaRiceBowl",
+    "bulk-turkey-avocado-sandwich": "grain",
+    "bulk-steak-roast-potato": "beefPotatoBowl",
+    "bulk-beef-rice-burrito": "beefPotatoBowl",
+    "bulk-chicken-peanut-curry": "chickenDinner",
+    "bulk-turkey-pasta-bolognese": "pasta",
+    "bulk-salmon-sweet-potato": "tunaRiceBowl",
+    "bulk-mass-gainer-smoothie": "smoothie",
+    "bulk-trail-mix": "spread",
+    "bulk-peanut-butter-banana-toast": "bananaPeanutButter",
+    "bulk-yogurt-granola": "dairy",
+    "bulk-ricecakes-peanut-butter": "spread",
+    "maintain-balanced-overnight-oats": "oats",
+    "maintain-scrambled-eggs-toast": "egg",
+    "maintain-berry-smoothie-bowl": "dairy",
+    "maintain-potato-skillet": "omelette",
+    "maintain-banana-protein-oatmeal": "oats",
+    "maintain-mediterranean-chicken-bowl": "chickenLunch",
+    "maintain-turkey-hummus-wrap": "wrap",
+    "maintain-salmon-avocado-salad": "tunaSalad",
+    "maintain-chicken-caesar-wrap": "chickenLunch",
+    "maintain-chickpea-quinoa-bowl": "plantLunch",
+    "maintain-chicken-vegetable-stir-fry": "chickenDinner",
+    "maintain-grilled-salmon-rice": "tunaRiceBowl",
+    "maintain-turkey-stuffed-peppers": "greens",
+    "maintain-lean-beef-tacos": "beefPotatoBowl",
+    "maintain-mediterranean-chicken-potatoes": "chickenDinner",
+    "maintain-apple-almond-butter": "spread",
+    "maintain-yogurt-parfait": "dairy",
+    "maintain-protein-smoothie": "smoothie",
+    "maintain-rice-cakes-avocado": "brownRice",
+    "maintain-nuts-fresh-fruit": "fruit"
+  };
+
   function mealPhotoKind(meal) {
+    if (MEAL_PHOTO_OVERRIDES[meal.id]) return MEAL_PHOTO_OVERRIDES[meal.id];
     if (meal.photo) return meal.photo;
     const title = meal.title.toLowerCase();
     if (title.includes("wrap")) return "wrap";

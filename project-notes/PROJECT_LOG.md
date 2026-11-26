@@ -58,14 +58,15 @@ Copy this block for each session.
 
 ### Session — 2026-11-26 — driver: not recorded
 
-- **Goal for this session:** Expand the workout and nutrition sections with detailed exercise guidance and complete recipes while preserving the existing design and functionality.
+- **Goal for this session:** Expand the workout and nutrition sections with detailed exercise guidance and complete recipes, then give meals more specific food photos while preserving the existing design and functionality.
 - **Key prompts we gave Copilot** (paste the important ones):
   1. “Update the existing website by expanding the Workouts and Nutrition sections without changing the current design, colour scheme, navigation or existing functionality.”
   2. “Add exercise instructions, muscle targets, equipment, sets/repetitions, rest, common mistakes, alternatives, and tutorial links for every exercise.”
   3. “Add complete recipes, cooking directions, nutrition, timing, cost, substitutions, meal-prep advice, storage, and cooking tutorial links to every bulking, cutting, and maintenance meal.”
   4. “For every Nutrition meal and food, use an actual food photo; add a personalized meal planner that calculates BMR/TDEE and calorie and macro targets, scales recipes, supports substitutions and both unit systems, updates instantly, and saves preferences locally.”
+  5. “Different meals show the same picture. Change each meal’s picture to its specific photo, and don’t change anything but the pictures.”
 - **What worked:** Copilot added expandable guidance to the generated strength and cardio exercise options and enriched all 60 goal-based recipes (20 per phase) with measured ingredients, cooking steps, nutrition, estimated time and cost, dietary alternatives, and storage recommendations. It also added real, locally bundled food photos, an adult nutrition profile, estimated BMR/TDEE and goal-based targets, scaled breakfast/lunch/dinner/snack recipes, substitutions, metric/imperial conversion, and browser-local preference storage. The existing navigation and design were retained. JavaScript syntax, diff whitespace, all 60 recipes' ingredient references, local photo paths, four-meal plans for all three goals, metric/imperial target equivalence, and low-calorie safeguards passed smoke checks.
-- **What broke, and how we fixed it:** No functional breakage was found during the checks. The bundled photo collection does not contain a unique photo for every dish, so meal cards reuse the closest available local food photograph. Tutorial buttons open title-specific YouTube search results; individual video pages were not verified, so those links should be reviewed if direct, vetted video URLs are required.
+- **What broke, and how we fixed it:** Different meals reused the same food photo. Copilot added 10 locally bundled CC0/public-domain food photos and explicit image assignments for all 60 meals, using the closest available dish-specific image where an exact photo was unavailable. The photo mapping was checked to confirm every recipe has an assignment and every referenced local image exists. No layout or functionality change was made. Tutorial buttons open title-specific YouTube search results; individual video pages were not verified, so those links should be reviewed if direct, vetted video URLs are required.
 - **Committed?** no — changes not yet committed
 
 ---
