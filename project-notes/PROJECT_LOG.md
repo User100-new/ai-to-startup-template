@@ -56,6 +56,17 @@ Copy this block for each session.
 - **What broke, and how we fixed it:** No website code change was made during this log-entry session. The project log template was incomplete, so it was filled with dated work-session summaries and a dated troubleshooting table.
 - **Committed?** no — project log update not yet committed
 
+### Session — 2026-11-26 — driver: not recorded
+
+- **Goal for this session:** Expand the workout and nutrition sections with detailed exercise guidance and complete recipes while preserving the existing design and functionality.
+- **Key prompts we gave Copilot** (paste the important ones):
+  1. “Update the existing website by expanding the Workouts and Nutrition sections without changing the current design, colour scheme, navigation or existing functionality.”
+  2. “Add exercise instructions, muscle targets, equipment, sets/repetitions, rest, common mistakes, alternatives, and tutorial links for every exercise.”
+  3. “Add complete recipes, cooking directions, nutrition, timing, cost, substitutions, meal-prep advice, storage, and cooking tutorial links to every bulking, cutting, and maintenance meal.”
+- **What worked:** Copilot added expandable guidance to the generated strength and cardio exercise options and enriched all 60 goal-based recipes (20 per phase) with measured ingredients, cooking steps, nutrition, estimated time and cost, dietary alternatives, and storage recommendations. Existing workout and meal-planning controls were retained. JavaScript syntax, recipe ingredient references, and patch whitespace checks passed.
+- **What broke, and how we fixed it:** No functional breakage was found during the checks. Tutorial buttons open title-specific YouTube search results; individual video pages were not verified, so those links should be reviewed if direct, vetted video URLs are required.
+- **Committed?** no — changes not yet committed
+
 ---
 
 ## Things that broke (running list)
